@@ -37,16 +37,53 @@ body.explorar .onlyJ{display:none!important}body:not(.explorar) .onlyE{display:n
 #bCam{width:56px;height:56px;right:calc(env(safe-area-inset-right) + 30px);bottom:calc(env(safe-area-inset-bottom) + 130px)}
 .tag{position:fixed;left:0;top:0;pointer-events:none;background:#fff;color:#1d2533;font-weight:800;font-size:13px;padding:2px 9px;border-radius:999px;border:2px solid #1d2533;white-space:nowrap;z-index:5;will-change:transform}
 .tag.me{background:#00d5ff}
+
+/* --- noche (fase 2) --- */
+#night{position:absolute;left:10px;top:calc(env(safe-area-inset-top) + 8px);background:rgba(11,12,20,.72);border-radius:14px;padding:7px 11px 9px;min-width:170px;display:none;border:1px solid rgba(255,255,255,.12)}
+body.juego #night{display:block}body.juego #title{display:none}
+#clk{font-weight:900;font-size:22px;letter-spacing:1px}#clk small{font-size:11px;font-weight:700;opacity:.8;letter-spacing:.3px;margin-left:6px}
+.bar{position:relative;height:13px;border-radius:7px;background:rgba(255,255,255,.12);margin-top:6px;overflow:hidden}.bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:7px;transition:width .25s}
+.bar b{position:absolute;left:7px;top:0;font-size:9.5px;line-height:13px;letter-spacing:1px;font-weight:900;color:#fff;text-shadow:0 1px 2px #000}
+#bFama i{background:linear-gradient(90deg,#ffb92e,#ffe27a)}#bExp i{background:linear-gradient(90deg,#ff4a4a,#ff2b6a)}#bExp.hot{animation:hot .5s infinite alternate}@keyframes hot{to{box-shadow:0 0 10px #ff2b2b}}
+#tasks{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 8px);width:min(270px,46vw);background:rgba(11,12,20,.72);border-radius:14px;padding:6px 10px 8px;display:none;border:1px solid rgba(255,255,255,.12)}
+body.juego #tasks{display:block}#tasks h4{margin:0 0 3px;font-size:10px;letter-spacing:2px;opacity:.75}
+#tasks div{font-size:13px;font-weight:800;line-height:1.25;padding:3px 0;border-top:1px solid rgba(255,255,255,.08);transition:opacity .4s}#tasks div:first-of-type{border-top:0}
+#tasks div.ok{color:#8dff9a;text-decoration:line-through}#tasks div.ko{color:#ff8a8a;text-decoration:line-through}#tasks div.new{animation:tin .5s}@keyframes tin{from{opacity:0;transform:translateX(12px)}}
+#tasks div em{font-style:normal;color:#ffd67a;font-size:11px;margin-left:4px}
+#inv{position:absolute;left:10px;top:calc(env(safe-area-inset-top) + 112px);display:flex;gap:6px}#inv span{background:rgba(11,12,20,.72);border-radius:10px;padding:3px 8px;font-size:13px;font-weight:800}
+#prompt{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);background:rgba(11,12,20,.82);border:2px solid #ffd67a;border-radius:999px;padding:7px 16px;font-weight:900;font-size:15px;white-space:nowrap;display:none}#prompt.warn{border-color:#ff5a5a}
+#prompt kbd{background:#ffd67a;color:#111;border-radius:6px;padding:0 6px;margin-right:7px;font-family:inherit}
+.touch #prompt{bottom:calc(env(safe-area-inset-bottom) + 128px);font-size:14px}
+#bAct{width:84px;height:84px;right:calc(env(safe-area-inset-right) + 104px);bottom:calc(env(safe-area-inset-bottom) + 30px);font-size:12px;text-align:center;line-height:1.1;padding:4px;opacity:.45}#bAct.ready{opacity:1;background:rgba(255,214,122,.9);color:#111;border-color:#fff}
+#drk{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(11,12,20,.9);border:2px solid #ffd67a;border-radius:16px;padding:8px;display:none;pointer-events:auto;gap:6px;flex-wrap:wrap;justify-content:center;width:min(560px,94vw)}#drk.on{display:flex}
+#drk h5{width:100%;margin:0 0 2px;text-align:center;font-size:13px}#drk button{font-family:inherit;font-weight:800;font-size:13px;border:0;border-radius:12px;padding:8px 10px;background:#2b2840;color:#fff;cursor:pointer}#drk button:hover{background:#4a3a6a}#drk button small{display:block;opacity:.7;font-size:10.5px}
+.touch #drk{bottom:calc(env(safe-area-inset-bottom) + 170px)}
+#evt{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translateX(-50%);background:rgba(176,60,255,.9);border-radius:999px;padding:6px 16px;font-weight:900;font-size:14px;white-space:nowrap;opacity:0;transition:opacity .4s}#evt.on{opacity:1}
+body.juego #evt{top:calc(env(safe-area-inset-top) + 120px)}@media (min-aspect-ratio:1/1){body.juego #evt{top:calc(env(safe-area-inset-top) + 14px)}}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30;transition:opacity .5s}
+.bub{position:fixed;left:0;top:0;pointer-events:none;background:#fff;color:#111827;font-weight:900;font-size:16px;padding:8px 13px;border-radius:15px;max-width:240px;text-align:center;z-index:6;box-shadow:0 4px 14px rgba(0,0,0,.45);border:2px solid #111827;line-height:1.22;will-change:transform}
+.bub:after{content:"";position:absolute;left:50%;bottom:-10px;margin-left:-9px;border:9px solid transparent;border-top-color:#111827;border-bottom:0}
+.bub.w{background:#ffe1e1;color:#7a0b0b;border-color:#7a0b0b}.bub.w:after{border-top-color:#7a0b0b}
+.bub.g{background:#e3ffd9;color:#14400a;border-color:#14400a}.bub.g:after{border-top-color:#14400a}
+.bub.me{background:#fff3c4}
+.touch .bub{font-size:15px;max-width:200px}
+#end{background:rgba(11,12,20,.88)}#end h1{margin:4px 0;font-size:clamp(26px,7vw,44px);color:#ffd67a}#end h3{margin:0;opacity:.9}#endStats{font-size:14px;line-height:1.6;margin:10px 0;opacity:.9}
 </style></head><body>
 <div id="layer"></div>
 <div id="load" class="scr on"><div style="font-weight:900;letter-spacing:6px;font-size:42px">HANGAR</div><div class="sub">Montando el local…</div></div>
-<div id="menu" class="scr"><img id="logo" alt="HANGAR"><div class="sub onlyJ">Av. de la Libertad 2 · Córdoba<br>Elige quién de la pandilla va esta noche al <b>Hangar</b>. El resto ya está dentro… y <b>Álvaro</b> pinchando en la cabina.</div><div id="grid" class="onlyJ"></div>
+<div id="menu" class="scr"><img id="logo" alt="HANGAR"><div class="sub onlyJ">Av. de la Libertad 2 · Córdoba<br>Elige quién de la pandilla va esta noche al <b>Hangar</b>. El resto ya está dentro y <b>Álvaro</b> pincha.<br>Una noche, de 22:00 a 06:00, en <b>5 minutos</b>: cumple <b>encargos</b>, llena la <b>FAMA</b>… y que <b>no te echen</b>.</div><div id="grid" class="onlyJ"></div>
 <div class="sub onlyE">Av. de la Libertad 2 · Córdoba<br>Modo <b>explorar</b>: eres <b>Antonio</b>. Date una vuelta tranquila por la terraza, la barra (con <b>Lola</b> y <b>Manolo</b>), el escenario y la avenida… mientras <b>Álvaro</b> pincha.</div>
 <button class="btn" id="go">ENTRAR</button>
 <div class="keys">Ordenador: <b>WASD / flechas</b> para andar · <b>Mayús</b> correr · <b>arrastrar ratón</b> girar cámara · <b>rueda</b> zoom · <b>C</b> cámara cerca/lejos<br>Móvil: <b>joystick</b> a la izquierda · <b>arrastra</b> a la derecha para girar · botón <b>CORRER</b></div></div>
 <div id="hud"><div id="title">HANGAR<small>Álvaro está pinchando</small></div><div id="hint">🔊 Toca la pantalla para oír la música</div>
-<div id="keysd"><b>WASD</b> andar · <b>Mayús</b> correr · <b>ratón</b> cámara · <b>C</b> zoom</div>
+<div id="night"><div id="clk">22:00<small id="phase">Abren las puertas</small></div><div class="bar" id="bFama"><i></i><b>FAMA</b></div><div class="bar" id="bExp"><i></i><b>EXPULSIÓN</b></div></div>
+<div id="tasks"><h4>ENCARGOS DE LA NOCHE</h4></div><div id="inv"></div><div id="evt"></div><div id="prompt"></div>
+<div id="drk"><h5>🍺 ¿Qué te pongo? <small style="opacity:.7">(aquí no hay grifo)</small></h5></div>
+<div class="tb" id="bAct">ACCIÓN</div>
+<div id="keysd"><b>WASD</b> andar · <b>Mayús</b> correr · <b>ratón</b> cámara · <b>C</b> zoom · <b>E</b> acción</div>
 <div id="joy"><i></i></div><div id="joyHint">MUÉVETE<br>AQUÍ</div><div class="tb" id="bRun">CORRER</div><div class="tb" id="bCam">🎥</div></div>
+<div id="end" class="scr"><h3 id="endWhy">¡Echamos el cierre! 06:00</h3><h1 id="endTitle">Leyenda del Hangar</h1><div id="endStats"></div><div><button class="btn" id="again">OTRA NOCHE</button><button class="btn" id="change" style="background:#3b3560;box-shadow:0 5px 0 #1c1a30">CAMBIAR DE PERSONAJE</button></div></div>
+<div id="flash"></div>
 <script type="module">/**
  * @license
  * Copyright 2010-2023 Three.js Authors
@@ -1084,7 +1121,8 @@ CYL(0.03, 0.35, M.metal, 1.0, 1.06, -7.7, 8); for (let i = 0; i < 3; i++) CYL(0.
 const WARM = []; { B(-4.0, H - 0.1, -7.83, 6.6, H - 0.06, -7.79, M.metal); for (let x = -3.6; x <= 6.3; x += 1.1) { CYL(0.008, H - 0.1 - 2.2, M.black, x, 2.2, -7.81, 4); const bell = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.2, 0.22, 16, 1, true), std({ color: '#4c5258', metalness: 0.7, roughness: 0.35, side: THREE.DoubleSide })); bell.position.set(x, 2.1, -7.81); scene.add(bell);
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), emi('#ffb860', 1.6)); bulb.position.set(x, 2.02, -7.81); scene.add(bulb); WARM.push(bulb); } }
 // taburetes de cuero frente a la barra
-const stool = (x, z, h = 0.75) => { CYL(0.18, 0.08, M.leather, x, h, z, 14); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.78; addG(new THREE.CylinderGeometry(0.012, 0.012, h, 5), M.frame, x + Math.cos(a) * 0.12, h / 2, z + Math.sin(a) * 0.12); } col(x - 0.2, z - 0.2, x + 0.2, z + 0.2); };
+const STOOLS = []; // taburetes dinámicos (instanciados): se pueden subir, tambalear, volcar y levantar
+const stool = (x, z, h = 0.75) => { col(x - 0.2, z - 0.2, x + 0.2, z + 0.2, h + 0.08); STOOLS.push({ x, z, h, c: COLL[COLL.length - 1], st: 'up', ang: 0, dir: [1, 0], wob: 0, push: 0, pushT: 0, inside: z < 0 }); };
 // (sin taburetes en la barra: interior sin mobiliario, a petición de Antonio)
 // 4 taburetes sueltos por la sala (se podrán subir/volcar en la fase 2)
 const STOOLS_IN = [[-3.2, -3.6], [-0.4, -4.3], [4.0, -3.4], [6.7, -4.4]]; for (const [x, z] of STOOLS_IN) stool(x, z);
@@ -1461,7 +1499,16 @@ const CART = window.POSTERS.build(scene, LITE, [
   { x: -10.87, y: 2.35, z: ZN + 0.07, w: 1.1, h: 3.5, ry: 0, scale: 0.8 }, { x: -8.33, y: 2.35, z: ZN + 0.07, w: 1.3, h: 3.5, ry: 0, scale: 0.8 }, { x: -9.65, y: 3.17, z: ZN + 0.07, w: 1.3, h: 1.85, ry: 0, scale: 0.7 }, // pasillo, pared norte
   { x: -10.87, y: 2.35, z: ZS - 0.07, w: 1.1, h: 3.5, ry: Math.PI, scale: 0.8 }, { x: -7.8, y: 2.35, z: ZS - 0.07, w: 2.4, h: 3.5, ry: Math.PI, scale: 0.8 }, { x: -9.65, y: 3.17, z: ZS - 0.07, w: 1.3, h: 1.85, ry: Math.PI, scale: 0.7 } // pasillo, pared sur
 ]);
-window.HW = { vehicle, GROUND, STOOLS_IN, scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, CAMB, CART, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
+// --- taburetes instanciados (2 llamadas de dibujo para todos)
+const STOOLM = (() => { const n = STOOLS.length; const mergeNI = gs => { const out = new THREE.BufferGeometry(); for (const k of ['position', 'normal', 'uv']) { const arrs = gs.map(g => g.attributes[k].array); const tot = arrs.reduce((a, b) => a + b.length, 0); const A = new Float32Array(tot); let o = 0; for (const a of arrs) { A.set(a, o); o += a.length; } out.setAttribute(k, new THREE.BufferAttribute(A, gs[0].attributes[k].itemSize)); } return out; };
+  const seatG = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 14); seatG.translate(0, 0.79, 0); const parts = [];
+  for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.78; const g = new THREE.CylinderGeometry(0.012, 0.016, 0.75, 5); g.translate(Math.cos(a) * 0.12, 0.375, Math.sin(a) * 0.12); parts.push(g.toNonIndexed()); }
+  { const g = new THREE.TorusGeometry(0.11, 0.008, 4, 16); g.rotateX(Math.PI / 2); g.translate(0, 0.28, 0); parts.push(g.toNonIndexed()); }
+  const seat = new THREE.InstancedMesh(seatG, M.leather, n), legs = new THREE.InstancedMesh(mergeNI(parts), M.frame, n); seat.userData.noCam = legs.userData.noCam = true; scene.add(seat, legs);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), ax = new THREE.Vector3(), T1 = new THREE.Matrix4(), T2 = new THREE.Matrix4();
+  function set(i) { const s = STOOLS[i]; const [dx, dz] = s.dir, r = 0.15, a = s.ang + s.wob; ax.set(dz, 0, -dx); q.setFromAxisAngle(ax, a); T1.makeTranslation(s.x + dx * r, 0, s.z + dz * r); T2.makeTranslation(-dx * r, 0, -dz * r); m4.makeRotationFromQuaternion(q); m4.premultiply(T1).multiply(T2); seat.setMatrixAt(i, m4); legs.setMatrixAt(i, m4); seat.instanceMatrix.needsUpdate = legs.instanceMatrix.needsUpdate = true; }
+  for (let i = 0; i < n; i++) set(i); seat.computeBoundingSphere(); legs.computeBoundingSphere(); seat.frustumCulled = legs.frustumCulled = false; return { set, seat, legs }; })();
+window.HW = { vehicle, GROUND, STOOLS_IN, STOOLS, STOOLM, scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, CAMB, CART, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
 })();
 </script>
 <script type="module">document.getElementById('logo').src = window.HANGAR_IMG.logo; // ===== HANGAR · juego (exploración libre) =====
@@ -1499,8 +1546,8 @@ const STAFF_CFG = [
   { id: 'manolo', name: 'Manolo', skin: '#c88a64', hair: { style: 'short', color: '#2a2420', side: '#7f7a74', volume: 0.9 }, beard: { style: 'short', color: '#3a322c', dark: '#211b17' }, brows: { color: '#1f1915', thick: 1.2, tilt: 0.05 }, eyes: { size: 0.05, squint: 0.45 }, mouth: { type: 'lip', color: '#8a4a40' }, shirt: { type: 'polo', color: '#16161a', sleeves: 'short', logo: '#ff2bd0' }, pants: { color: '#2b2b30' }, shoes: { color: '#141414' } } ];
 const STAFF = STAFF_CFG.map((c, i) => { const n = mkPop(c, true); const s = { n, cfg: c, x: i ? 3.6 : 0.4, z: -8.85, tx: i ? 3.6 : 0.4, wait: 1 + i * 2.5, yaw: 0 }; n.position.set(s.x, 0, s.z); return s; });
 function updStaff(dt) { for (const s of STAFF) { const dx = s.tx - s.x; let sp = 0; if (Math.abs(dx) > 0.05) { const v = Math.sign(dx) * Math.min(1.1, Math.abs(dx) * 2); s.x += v * dt; sp = Math.abs(v) / 2.4; s.yaw += angDiff(s.yaw, Math.sign(dx) * Math.PI / 2) * Math.min(1, dt * 8); }
-  else { s.yaw += angDiff(s.yaw, 0) * Math.min(1, dt * 5); s.wait -= dt; if (s.wait < 0) { const lo = s === STAFF[0] ? -2.6 : 1.6, hi = s === STAFF[0] ? 1.4 : 6.2; s.tx = lo + Math.random() * (hi - lo); s.wait = 2.5 + Math.random() * 5; } }
-  s.n.position.set(s.x, 0, s.z); s.n.rotation.y = s.yaw; s.n.userData.update(dt, { speed: sp, grounded: true }); } }
+  else { s.yaw += angDiff(s.yaw, 0) * Math.min(1, dt * 5); if (!s.busy) s.wait -= dt; if (s.wait < 0) { const lo = s === STAFF[0] ? -2.6 : 1.6, hi = s === STAFF[0] ? 1.4 : 6.2; s.tx = lo + Math.random() * (hi - lo); s.wait = 2.5 + Math.random() * 5; } }
+  s.n.position.set(s.x, 0, s.z); s.n.rotation.y = s.yaw; s.n.userData.update(dt, { speed: sp, grounded: true, wave: !!s.wave }); } }
 // la pandilla como PNJ: grupitos repartidos por la sala y la terraza (mirando a su corrillo)
 const NPC_SPOTS = [[0.8, -3.3, 1.5, -3.6], [2.2, -3.2, 1.5, -3.6], [1.5, -4.2, 1.5, -3.6], [6.2, -2.0, 9.4, -3.2], [6.9, -2.9, 9.4, -3.2], [-3.95, -6.8, -3.95, -8], [-3.3, -6.85, -3.3, -8], [6.6, 6.2, 7.2, 6.7], [7.4, 6.85, 6.6, 6.2]];
 const NPCS = [];
@@ -1549,10 +1596,11 @@ function readInput() { if (INPUT) return INPUT; let x = 0, z = 0; if (keys.KeyW 
   const l = Math.hypot(x, z); if (l > 1) { x /= l; z /= l; } return { x, z, run: P.run || keys.ShiftLeft || keys.ShiftRight }; }
 const groundAt = (x, z) => { let y = 0; for (const g of W.GROUND || []) if (x > g[0] && x < g[2] && z > g[1] && z < g[3] && g[4] > y) y = g[4]; return y; };
 const inside = p => W.INT.some(r => p.x > r.x0 && p.x < r.x1 && p.z > r.z0 && p.z < r.z1);
-function stepPlayer(dt) { const I = readInput(); const f = V3(-Math.sin(cam.yaw), 0, -Math.cos(cam.yaw)), r = V3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw));
+const HOOK = {}; // ganchos de la noche (hnoche.js): move/input/after/upd/ui
+function stepPlayer(dt) { let I = readInput(); if (HOOK.input) I = HOOK.input(I, dt); if (HOOK.move && HOOK.move(dt, I)) return; const f = V3(-Math.sin(cam.yaw), 0, -Math.cos(cam.yaw)), r = V3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw));
   const want = V3().addScaledVector(r, I.x).addScaledVector(f, -I.z); const mag = want.length(); const spd = (I.run ? 4.6 : 2.4) * mag;
   if (mag > 0.05) { const ty = Math.atan2(want.x, want.z); const d = angDiff(P.yaw, ty); P.turn = d / dt; P.yaw += d * Math.min(1, dt * 10); } else P.turn = 0;
-  const tv = mag > 0.05 ? want.normalize().multiplyScalar(spd) : V3(); P.vel.lerp(tv, Math.min(1, dt * 10)); P.pos.addScaledVector(P.vel, dt); pushNPC(P.pos); collide(P.pos); for (const v of W.CARS) { const hl = v.L / 2 + 0.3, hw = (v.kind === 'bus' ? 1.28 : 1.0) + 0.3, dx = P.pos.x - v.x, dz = P.pos.z - v.lane; if (Math.abs(dx) < hl && Math.abs(dz) < hw) { if (hl - Math.abs(dx) < hw - Math.abs(dz)) P.pos.x = v.x + Math.sign(dx || 1) * hl; else P.pos.z = v.lane + Math.sign(dz || 1) * hw; } } { const gy = groundAt(P.pos.x, P.pos.z); P.pos.y = gy > P.pos.y ? Math.min(gy, P.pos.y + dt * 4) : Math.max(gy, P.pos.y - dt * 5); }
+  const tv = mag > 0.05 ? want.normalize().multiplyScalar(spd) : V3(); P.vel.lerp(tv, Math.min(1, dt * 10)); P.pos.addScaledVector(P.vel, dt); pushNPC(P.pos); collide(P.pos); for (const v of W.CARS) { const hl = v.L / 2 + 0.3, hw = (v.kind === 'bus' ? 1.28 : 1.0) + 0.3, dx = P.pos.x - v.x, dz = P.pos.z - v.lane; if (Math.abs(dx) < hl && Math.abs(dz) < hw) { if (hl - Math.abs(dx) < hw - Math.abs(dz)) P.pos.x = v.x + Math.sign(dx || 1) * hl; else P.pos.z = v.lane + Math.sign(dz || 1) * hw; } } if (HOOK.after) HOOK.after(dt); { const gy = HOOK.ground ? HOOK.ground(P.pos.x, P.pos.z, groundAt(P.pos.x, P.pos.z)) : groundAt(P.pos.x, P.pos.z); P.pos.y = gy > P.pos.y ? Math.min(gy, P.pos.y + dt * 4) : Math.max(gy, P.pos.y - dt * 5); }
   ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: Math.hypot(P.vel.x, P.vel.z) / 2.4, grounded: true, turn: clamp(P.turn || 0, -6, 6) * 0.1 }); }
 // ---------- cámara (seguimiento + brazo con colisión; sin ocultar geometría) ----------
 const cam = { yaw: 0, pitch: 0.32, target: V3() }; let camDist = TOUCH && innerHeight > innerWidth ? 6.4 : 5.6, camMode = 'follow', camFix = null;
@@ -1659,8 +1707,284 @@ function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = M
   ledT += dt; if (ledT > (LITE ? 0.12 : 0.05)) { drawLED(T); ledT = 0; } }
 // ---------- bucle ----------
 let STATE = TEST ? 'play' : 'menu', topCam = null;
-function update(dt) { T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) n.userData.update(dt, { speed: 0, grounded: true }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
-let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); } requestAnimationFrame(loop); }
+function update(dt) { T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) n.userData.update(dt, { speed: 0, grounded: true }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
+let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); if (HOOK.ui) HOOK.ui(dt); } requestAnimationFrame(loop); }
+// ---------- la noche (bucle de juego, barra, guardarropa, baños, taburetes) ----------
+// ===== HANGAR · LA NOCHE (fase 2): 22:00→06:00 en 5 min, FAMA / EXPULSIÓN, encargos, barra sin grifo, guardarropa, baños, taburetes =====
+// (se inyecta DENTRO del cierre de hgame.js: usa P, ant, PJ, NPCS, STAFF, W, HOOK, AC…)
+const GIRLS = new Set(['angie', 'maca', 'anita', 'esther', 'mario']);
+const isGirl = () => GIRLS.has(antCfg.id), oa = () => isGirl() ? 'a' : 'o';
+const rnd = (a, b) => a + Math.random() * (b - a), pick = a => a[(Math.random() * a.length) | 0];
+const NIGHT_LEN = +(Q.get('noche') || 300); // segundos reales para 22:00→06:00
+const N = { on: false, t: 0, gm: 0, fama: 0, exp: 0, tasks: [], done: new Set(), stats: { drinks: 0, stools: 0, queue: 0, skips: 0, tasks: 0 }, ticket: null, jacket: true, ended: false };
+// ---------- utilidades: sonido, aviso, destello ----------
+function sfx(k) { if (!AC) return; const t = AC.currentTime, g = AC.createGain(); g.connect(AC.destination); g.gain.value = 0.22;
+  const tone = (f, d, v = 0.3, type = 'sine', t0 = 0) => { const o = AC.createOscillator(), e = AC.createGain(); o.type = type; o.frequency.value = f; e.gain.setValueAtTime(0.0001, t + t0); e.gain.exponentialRampToValueAtTime(v, t + t0 + 0.01); e.gain.exponentialRampToValueAtTime(0.0001, t + t0 + d); o.connect(e); e.connect(g); o.start(t + t0); o.stop(t + t0 + d + 0.05); };
+  const noise = (d, f, q, v, t0 = 0, att = 0.01) => { const n = Math.max(1, Math.floor(AC.sampleRate * d)), b = AC.createBuffer(1, n, AC.sampleRate), a = b.getChannelData(0); for (let i = 0; i < n; i++) a[i] = Math.random() * 2 - 1; const s = AC.createBufferSource(); s.buffer = b; const fl = AC.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = f; fl.Q.value = q; const e = AC.createGain(); e.gain.setValueAtTime(0.0001, t + t0); e.gain.exponentialRampToValueAtTime(v, t + t0 + att); e.gain.exponentialRampToValueAtTime(0.0001, t + t0 + d); s.connect(fl); fl.connect(e); e.connect(g); s.start(t + t0); };
+  if (k === 'clink') { tone(2300, 0.25, 0.25); tone(3150, 0.2, 0.15, 'sine', 0.06); }
+  else if (k === 'ding') { tone(880, 0.18, 0.25, 'triangle'); tone(1320, 0.3, 0.25, 'triangle', 0.1); }
+  else if (k === 'crash') { noise(0.5, 700, 0.8, 0.9); tone(70, 0.3, 0.6, 'sine'); noise(0.25, 2600, 2, 0.4, 0.12); }
+  else if (k === 'cheer') { noise(1.6, 1100, 0.6, 0.5, 0, 0.35); noise(1.2, 2400, 1.5, 0.25, 0.2, 0.3); }
+  else if (k === 'clap') { for (let i = 0; i < 26; i++) noise(0.05, 1800 + Math.random() * 1500, 1.2, 0.35 + Math.random() * 0.3, Math.random() * 1.6); }
+  else if (k === 'boo') { tone(150, 0.9, 0.18, 'sawtooth'); tone(110, 1.0, 0.15, 'sawtooth', 0.1); noise(0.9, 400, 0.7, 0.25); }
+  else if (k === 'shutter') { noise(0.06, 3000, 1, 0.6); noise(0.05, 2000, 1, 0.5, 0.09); }
+  else if (k === 'bad') { tone(330, 0.2, 0.25, 'square'); tone(220, 0.35, 0.25, 'square', 0.15); } }
+let evtT = 0; function evt(txt, d = 3.2) { const e = $('evt'); e.textContent = txt; e.classList.add('on'); evtT = d; }
+function flash() { const f = $('flash'); f.style.transition = 'none'; f.style.opacity = '0.9'; requestAnimationFrame(() => { f.style.transition = 'opacity .6s'; f.style.opacity = '0'; }); }
+// ---------- bocadillos: máx. 2 a la vez, ≥4,5 s visibles, letra grande ----------
+const BUBS = [], BUB_CAP = 2;
+function say(n, text, o = {}) { if (!n || !text) return null; const pri = o.pri || 1;
+  const old = BUBS.find(b => b.n === n); if (old) killBub(old);
+  if (BUBS.length >= BUB_CAP) { const v = BUBS.filter(b => b.pri <= pri).sort((a, b) => a.pri - b.pri || a.t - b.t)[0]; if (!v) return null; killBub(v); }
+  const el = document.createElement('div'); el.className = 'bub ' + (o.cls || ''); el.textContent = text; layer.appendChild(el); const b = { n, el, t: Math.max(4.5, o.dur || 4.5), pri }; BUBS.push(b); return b; }
+function killBub(b) { b.el.remove(); const i = BUBS.indexOf(b); if (i >= 0) BUBS.splice(i, 1); }
+function updBubs(dt) { for (const b of [...BUBS]) { b.t -= dt; if (b.t <= 0 || !b.n.visible) { killBub(b); continue; } const p = headTop(b.n); p.y += 0.42; const d = p.distanceTo(camera.position); const s = p.project(camera); const vis = s.z < 1 && d < 24 && Math.abs(s.x) < 1.05 && Math.abs(s.y) < 1.1;
+  b.el.style.display = vis ? 'block' : 'none'; if (vis) b.el.style.transform = `translate(-50%,-100%) translate(${(s.x * 0.5 + 0.5) * innerWidth}px,${(-s.y * 0.5 + 0.5) * innerHeight}px)`; } }
+const clearBubs = () => { for (const b of [...BUBS]) killBub(b); };
+// ---------- PNJ extra (público del Hangar: más pijo, más mayor, mezclado) ----------
+const XSK = ['#e2b190', '#d6a07c', '#c48a64', '#f0c8a8', '#b87a54', '#a86c48', '#8d5a3b'], XHAIR = ['#2a1d14', '#1a1410', '#5a3a22', '#3b2a1e', '#7a4a2a', '#8f877f', '#b8b0a6', '#c9a16a'];
+const XTOP = ['#f4f2ec', '#1f2638', '#c9b28a', '#2e2e33', '#6b1f2a', '#3b6e8f', '#e8d9bf', '#141416', '#7b8f5a', '#d6763a'];
+function extraCfg(girl, seed) { const r = (a) => a[(seed = (seed * 16807) % 2147483647) % a.length]; const hc = r(XHAIR);
+  if (girl) return { skin: r(XSK), cheek: '#e08a76', cheekOpacity: 0.18, hair: { style: r(['long', 'bob', 'long', 'pixie', 'wavy']), color: hc, side: hc, volume: 1.1, len: 1.0, part: true }, brows: { color: '#2a1a12', thick: 0.85, y: 0.3 }, eyes: { size: 0.056, lashes: true, squint: 0.2 }, mouth: { type: 'smile', width: 0.15, depth: 0.03, lip: r(['#b0303a', '#b8605e', '#a8323c']) }, earrings: { type: r(['hoop', 'stud', 'drop']), color: '#d8b04a' }, glasses: { type: r(['none', 'none', 'square']), frame: '#111', lens: '#0a0b0e', sun: true }, shirt: { type: r(['tank', 'shirt', 'tank']), color: r(XTOP), open: false, sleeves: 'long' }, pants: { color: r(['#1c1c22', '#33415e', '#f1ede4', '#5b4632']) }, shoes: { color: r(['#151515', '#c79a6a', '#e8e4dc']) } };
+  return { skin: r(XSK), hair: { style: r(['short', 'swept', 'curly', 'bald', 'short', 'wavy']), color: hc, side: r(XHAIR), volume: 1.0 }, beard: { style: r(['none', 'short', 'stubble', 'none']), color: hc, dark: '#1a120c' }, brows: { color: '#231a15', thick: 1.0 }, glasses: { type: r(['none', 'none', 'aviator', 'round']), frame: r(['#111', '#c9a24a']), lens: '#0b0d10', sun: Math.random() < 0.3 }, shirt: { type: r(['shirt', 'polo', 'shirt']), color: r(XTOP), open: Math.random() < 0.5, sleeves: r(['long', 'short']) }, jacket: Math.random() < 0.3 ? { color: r(['#1f2638', '#3a3d45', '#5a3a22']) } : undefined, pants: { color: r(['#2d3a50', '#cbb68e', '#2b2f38', '#e9e4d8']) }, shoes: { color: r(['#3b2a20', '#151515', '#7a4a2a']) } }; }
+const mkW = (n, x, z, yaw = 0) => { n.position.set(x, 0, z); n.rotation.y = yaw; return { n, path: [], sp: 1.25, yaw, y: 0, face: null, dance: false, wave: false, done: null }; };
+function walkTo(w, pts, done, sp) { w.path = pts.map(p => V3(p[0], 0, p[1])); w.done = done || null; if (sp) w.sp = sp; }
+function updW(w, dt) { let s = 0; if (w.path.length) { const t = w.path[0], p = w.n.position, dx = t.x - p.x, dz = t.z - p.z, d = Math.hypot(dx, dz); if (d < 0.06) { w.path.shift(); if (!w.path.length && w.done) { const f = w.done; w.done = null; f(w); } } else { const st = Math.min(d, w.sp * dt); p.x += dx / d * st; p.z += dz / d * st; w.yaw += angDiff(w.yaw, Math.atan2(dx, dz)) * Math.min(1, dt * 9); s = w.sp / 2.4; } }
+  else if (w.face != null) w.yaw += angDiff(w.yaw, w.face) * Math.min(1, dt * 5);
+  const onStage = w.n.position.x > W.STG.x0 + 0.05 && w.n.position.z > W.STG.z0 && w.n.position.z < W.STG.z1; w.y += ((onStage ? W.STG.h : 0) - w.y) * Math.min(1, dt * 10); w.n.position.y = w.y; w.n.rotation.y = w.yaw; w.n.userData.update(dt, { speed: s, grounded: true, dance: w.dance && !s, wave: w.wave }); }
+// ---------- botellas (sin cañas: tercios, botellines, cubatas) ----------
+const GLASS = { tercio: new THREE.MeshStandardMaterial({ color: '#5a2e0e', roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.92 }), botellin: new THREE.MeshStandardMaterial({ color: '#2f5a1e', roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.92 }), cubata: new THREE.MeshStandardMaterial({ color: '#d8e6f0', roughness: 0.05, transparent: true, opacity: 0.45 }), agua: new THREE.MeshStandardMaterial({ color: '#cfe8ff', roughness: 0.05, transparent: true, opacity: 0.55 }) };
+const LABEL = new THREE.MeshStandardMaterial({ color: '#f2e6c8', roughness: 0.6 }), COLA = new THREE.MeshStandardMaterial({ color: '#3a1a0a', roughness: 0.3 }), CAP = new THREE.MeshStandardMaterial({ color: '#c9a24a', metalness: 0.8, roughness: 0.3 });
+function bottle(kind) { const g = new THREE.Group(); if (kind === 'cubata') { const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.042, 0.15, 12, 1, true), GLASS.cubata); gl.position.y = 0.075; const li = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.04, 0.11, 12), COLA); li.position.y = 0.06; const st = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.2, 4), new THREE.MeshBasicMaterial({ color: '#ff2bd0' })); st.position.set(0.02, 0.13, 0); st.rotation.z = 0.25; g.add(gl, li, st); }
+  else { const tall = kind === 'tercio' ? 1 : 0.8, m = GLASS[kind] || GLASS.tercio; const b = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.15 * tall, 10), m); b.position.y = 0.075 * tall; const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.036, 0.06, 10), m); sh.position.y = 0.15 * tall + 0.03; const nk = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.05, 8), m); nk.position.y = 0.15 * tall + 0.085; const lb = new THREE.Mesh(new THREE.CylinderGeometry(0.0375, 0.0375, 0.06, 10, 1, true), LABEL); lb.position.y = 0.07 * tall; const cp = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.012, 8), CAP); cp.position.y = 0.15 * tall + 0.115; g.add(b, sh, nk, cp); if (kind !== 'agua') g.add(lb); }
+  g.userData.noCam = true; g.traverse(o => { o.userData.noCam = true; }); return g; }
+function holdIn(n, kind) { const arm = n.userData.arms[1]; const b = bottle(kind); b.position.set(0, -0.36, 0.06); b.rotation.x = -0.25; b.scale.setScalar(1.25); arm.add(b); return b; }
+// ---------- jugador: bebida en la mano, bailar, taburete, cola ----------
+const PL = { drink: null, kind: null, sips: 0, sipT: 0, round: 0, dance: false, stool: null, q: -1, buzz: 0, req: [], kicked: 0, inWC: 0, wcCool: 0, onStoolT: 0, stoolFama: 0, warnT: 0 };
+function dropDrink() { if (PL.drink && PL.drink.parent) PL.drink.parent.remove(PL.drink); PL.drink = null; PL.kind = null; PL.round = 0; updInv(); }
+function giveDrink(kind) { dropDrink(); PL.kind = kind; PL.sips = kind === 'ronda' ? 0 : 3; PL.round = kind === 'ronda' ? 3 : 0; PL.drink = holdIn(ant, kind === 'ronda' ? 'botellin' : kind); sfx('clink'); updInv(); }
+function updInv() { const e = $('inv'); const it = []; if (PL.round) it.push(`🍾 Ronda: ${PL.round} botellines`); else if (PL.kind) it.push({ tercio: '🍺 Tercio', botellin: '🍺 Botellín', cubata: '🥃 Cubata', agua: '💧 Agua' }[PL.kind] + ' ' + '●'.repeat(PL.sips)); if (N.on && N.ticket) it.push(N.ticket.lost ? '🎟 ¿¿Ticket??' : '🎟 nº ' + N.ticket.n); if (N.on && N.stats.drinks >= 3) it.push('🥴'.repeat(Math.min(3, N.stats.drinks - 2))); e.innerHTML = it.map(x => `<span>${x}</span>`).join(''); }
+// ---------- FAMA / EXPULSIÓN ----------
+function fama(v, why) { if (!N.on) return; N.fama = Math.max(0, N.fama + v); if (why && v >= 5) evt((v > 0 ? '+' : '') + Math.round(v) + ' FAMA · ' + why, 2.4); }
+function expl(v, why) { if (!N.on || N.ended) return; N.exp = clamp(N.exp + v, 0, 100); if (why && v >= 5) evt('⚠️ ' + why, 2.6); if (N.exp >= 100) expel(); }
+// ---------- la noche: fases ----------
+const hhmm = gm => { const m = (22 * 60 + Math.floor(gm)) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+const TL = { band: 60, cs: 150, ce: 250, bis: 262, bisE: 282, last: 450, end: 480 };
+function phaseName(gm) { if (gm < TL.band) return 'Álvaro calentando'; if (gm < TL.cs) return gm < TL.band + 8 ? '¡Llega la banda!' : 'El concierto «a las 23:00»…'; if (gm < TL.ce) return '🎸 Concierto: LOS FAROS'; if (gm < TL.bis) return '¡OTRA! ¡OTRA!'; if (gm < TL.bisE) return '🎸 El bis'; if (gm < TL.last) return 'Sesión de Álvaro'; return '🍾 Última ronda'; }
+// ---------- banda (Los Faros) ----------
+const BAND_CFG = [
+  { skin: '#e2b190', hair: { style: 'swept', color: '#1a1410', side: '#1a1410', volume: 1.2 }, beard: { style: 'stubble', color: '#2a1d14', dark: '#1a120c' }, glasses: { type: 'none' }, shirt: { type: 'shirt', color: '#141416', open: true, sleeves: 'long' }, jacket: { color: '#0f0f12' }, pants: { color: '#1c1c22' }, shoes: { color: '#151515' } },
+  { skin: '#c48a64', hair: { style: 'long', color: '#3b2a1e', side: '#2a1d14', len: 0.9 }, beard: { style: 'short', color: '#3b2a1e', dark: '#1a120c' }, shirt: { type: 'tshirt', color: '#d9a43a' }, pants: { color: '#33415e' }, shoes: { color: '#e8e4dc' } },
+  { skin: '#f0c8a8', cheek: '#e08a76', cheekOpacity: 0.2, hair: { style: 'bob', color: '#c0392b', side: '#7a2010', volume: 1.2, bangs: true }, eyes: { size: 0.056, lashes: true }, mouth: { type: 'smile', width: 0.15, depth: 0.03, lip: '#a8323c' }, shirt: { type: 'tank', color: '#f4f2ec' }, pants: { color: '#141416' }, shoes: { color: '#151515' } } ];
+const BAND = EXPLORE ? [] : BAND_CFG.map(c => { const w = mkW(mkPop(c, false), 1.75, 6, 0); w.n.visible = false; return w; });
+const BAND_SPOT = [[8.45, -3.6, -Math.PI / 2], [8.9, -5.4, -Math.PI / 2 - 0.3], [8.9, -1.9, -Math.PI / 2 + 0.3]];
+BAND.forEach((w, i) => tag(w.n, ['Rober (voz)', 'Nacho (guitarra)', 'Lu (bajo)'][i]));
+// ---------- Vane (guardarropa) ----------
+const VANE = EXPLORE ? null : mkW(mkPop({ id: 'vane', name: 'Vane', skin: '#e0a985', cheek: '#e08a76', cheekOpacity: 0.2, hair: { style: 'long', color: '#c9a16a', side: '#8a6a3a', volume: 1.15, len: 1.1, bangs: true }, brows: { color: '#5a3a22', thick: 0.8, y: 0.3 }, eyes: { size: 0.058, lashes: true }, mouth: { type: 'smile', width: 0.17, depth: 0.035, lip: '#c0505a' }, earrings: { type: 'hoop', color: '#e5e5e5', size: 1.4 }, shirt: { type: 'tank', color: '#2a1f3a' }, pants: { color: '#141416' }, shoes: { color: '#151515' } }, true), -7.25, -5.95, Math.PI / 2);
+if (VANE) { VANE.face = Math.PI / 2; tag(VANE.n, 'Vane'); }
+// ---------- extras: cola de la barra y baños ----------
+const XQ = EXPLORE ? [] : [0, 1, 2].map(i => mkW(mkPop(extraCfg(i === 1, 9301 + i * 77), false), 1.5 + i, -3.0, 0));
+const XWC = EXPLORE ? [] : [mkW(mkPop(extraCfg(true, 4242), false), -9.1, -4.7, Math.PI / 2), mkW(mkPop(extraCfg(false, 777), false), -8.95, -9.85, Math.PI / 2)];
+XWC.forEach(w => { w.face = Math.PI / 2; });
+// la cola: punto de pedir y huecos hacia la sala (perpendicular a la barra)
+const QX = 1.9, QSLOT = [[QX, -6.72], [QX, -5.95], [QX, -5.2], [QX, -4.45]];
+const Q_ = { line: [], serveT: 4, srv: null }; // line: walkers o 'P' (jugador)
+const tape = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const x = c.getContext('2d'); x.fillStyle = '#ffd23a'; x.fillRect(0, 0, 256, 64); x.fillStyle = '#111'; for (let i = -2; i < 12; i++) { x.beginPath(); x.moveTo(i * 28, 64); x.lineTo(i * 28 + 14, 64); x.lineTo(i * 28 + 34, 0); x.lineTo(i * 28 + 20, 0); x.fill(); } x.fillStyle = '#ffd23a'; x.fillRect(46, 14, 164, 36); x.fillStyle = '#111'; x.font = 'bold 26px Arial Black, sans-serif'; x.textAlign = 'center'; x.fillText('COLA AQUÍ', 128, 42); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.22), new THREE.MeshBasicMaterial({ map: t, transparent: true, polygonOffset: true, polygonOffsetFactor: -2 })); m.rotation.x = -Math.PI / 2; m.position.set(QX, 0.012, -6.72); m.userData.noCam = true; scene.add(m); return m; })();
+tape.visible = !EXPLORE;
+const qBusy = () => N.on && ((N.gm > 25 && N.gm < TL.cs + 10) || (N.gm > TL.bisE && N.gm < 420));
+function qPos(i) { const s = QSLOT[Math.min(i, QSLOT.length - 1)]; return [s[0], s[1] + (i >= QSLOT.length ? (i - QSLOT.length + 1) * 0.75 : 0)]; }
+function qRelayout() { Q_.line.forEach((w, i) => { const [x, z] = qPos(i); if (w === 'P') { PL.q = i; PL.qT = [x, z]; } else walkTo(w, [[x, z]], q => { q.face = Math.PI; }); }); const [ex, ez] = qPos(Q_.line.length); tape.position.set(ex, 0.012, ez); }
+function qJoin(w) { if (Q_.line.includes(w)) return; Q_.line.push(w); qRelayout(); }
+function qLeave(w) { const i = Q_.line.indexOf(w); if (i >= 0) Q_.line.splice(i, 1); if (w === 'P') PL.q = -1; qRelayout(); }
+const barman = x => STAFF.reduce((a, s) => Math.abs(s.x - x) < Math.abs(a.x - x) ? s : a, STAFF[0]);
+function serveAt(x, cb) { const s = barman(x); s.busy = true; s.tx = clamp(x, -2.6, 6.2); s.wait = 99; setTimeout(() => { cb(s); s.busy = false; s.wait = 2 + Math.random() * 3; }, 1500 + Math.abs(s.x - x) * 600); return s; }
+function updQueue(dt) { if (EXPLORE || !N.on) return; // los clientes extra vuelven a la cola si hay jaleo
+  for (const w of XQ) { if (!Q_.line.includes(w) && !w.path.length && !w.away && qBusy() && Math.random() < dt * 0.15) qJoin(w); }
+  if (!Q_.line.length) return; const f = Q_.line[0]; if (f === 'P') return; // el jugador elige en el panel
+  if (f.path.length) return; if (Q_.srv) return; Q_.serveT -= dt; if (Q_.serveT > 0) return; Q_.srv = f;
+  serveAt(QX, s => { say(s.n, pick(['¡Marchando!', 'Tercio, ¿no? Toma.', '¿Botellín? Venga.', 'Cubata de lo de siempre…']), { dur: 4.5 }); if (!f.bottle) f.bottle = holdIn(f.n, pick(['tercio', 'botellin', 'cubata'])); sfx('clink');
+    qLeave(f); Q_.srv = null; Q_.serveT = rnd(3.5, 5.5); f.away = 1; const sp = pick([[0.4, -3.4], [2.8, -3.0], [5.8, -2.4], [-0.6, -4.3], [3.6, -4.0]]); walkTo(f, [[QX + 0.8, -5.5], sp], q => { q.face = rnd(-3, 3); setTimeout(() => { q.away = 0; if (q.bottle) { q.bottle.parent.remove(q.bottle); q.bottle = null; } }, rnd(12000, 22000)); }); }); }
+// ---------- panel de bebidas ----------
+const MENU = [['tercio', 'Tercio', '3,50 €'], ['botellin', 'Botellín', '2,50 €'], ['cubata', 'Cubata', '7 €'], ['ronda', 'Ronda pa la pandilla', '3 botellines · 7 €'], ['agua', 'Agua', '2 € (sí, 2 €)'], ['cana', '¿Una caña?', '…']];
+const drk = $('drk'); for (const [k, l, pr] of MENU) { const b = document.createElement('button'); b.innerHTML = `${l}<small>${pr}</small>`; b.onclick = e => { e.stopPropagation(); order(k); }; b.addEventListener('pointerdown', e => e.stopPropagation()); drk.appendChild(b); }
+let drkOpen = null; // {colado}
+function openBar(colado) { drkOpen = { colado, x: P.pos.x }; drk.classList.add('on'); }
+function closeBar() { drkOpen = null; drk.classList.remove('on'); }
+function order(k) { if (!drkOpen) return; const col = drkOpen.colado, x = clamp(P.pos.x, -2.6, 6.2); closeBar();
+  if (k === 'cana') { const s = barman(x); say(s.n, pick(['¿Caña? Aquí no hay grifo, chiquillo. Tercio o botellín.', 'Ozú, ¿caña? Esto no es un bar de tapas: botellín o tercio.', 'Grifo no hay. Ni lo ha habido. ¿Tercio?']), { pri: 3, dur: 5 }); return; }
+  serveAt(x, s => { giveDrink(k); say(s.n, col ? pick(['Te pongo porque me pillas buena… la próxima, A LA COLA.', 'Toma, pero que sepas que te has colado, ¿eh?']) : pick(['¡Marchando! Que aproveche.', 'Aquí tienes, rey.', 'Fresquito, recién sacado.', 'Toma, cariño. ¿Algo más?']), { pri: 3, dur: 4.5, cls: col ? 'w' : '' });
+    if (PL.q >= 0) qLeave('P'); if (!col) done('tercio'); if (k === 'ronda') { if (N.tasks.includes('ronda')) evt('🍾 Ronda en la mano: dásela a 3 de la pandilla', 3); } }); }
+// ---------- taburetes: subirse, tambalear (3 empujones) y volcar ----------
+const STO = W.STOOLS; let stoolTick = 0;
+function stoolNear(maxD, st = 'up') { let best = null, bd = maxD; for (const s of STO) { if (s.st !== st) continue; const d = Math.hypot(s.x - P.pos.x, s.z - P.pos.z); if (d < bd) { bd = d; best = s; } } return best; }
+function knock(s) { s.st = 'falling'; s.fallT = 0; s.c[4] = 0.12; sfx('crash'); N.stats.stools++; const ins = s.inside; expl(ins ? 13 : 7, ins ? '¡Taburete por los suelos!' : 'Taburete de la terraza al suelo'); fama(-2);
+  protest(s, ['¡Ozú, qué malaje!', '¡Ya está el de siempre!', '¡Chiquillo, que eso cuesta dinero!', '¡Levántalo, sinvergüenza!', 'Qué poca clase, por Dios.']); if (Math.random() < 0.35) loseTicket(); }
+function protest(at, lines, cls = 'w') { const near = [...NPCS, ...XQ.map(w => w.n), ...STAFF.map(s => s.n), ...BAND.filter(w => w.n.visible).map(w => w.n)].filter(n => n.visible && n.position.distanceTo(V3(at.x, 0, at.z)) < 7).sort((a, b) => a.position.distanceTo(V3(at.x, 0, at.z)) - b.position.distanceTo(V3(at.x, 0, at.z)));
+  const ls = [...lines].sort(() => Math.random() - 0.5); near.slice(0, 2).forEach((n, i) => setTimeout(() => say(n, ls[i % ls.length], { pri: 4, cls, dur: 4.6 }), i * 450)); for (const n of near.slice(0, 4)) n.lookAt?.(P.pos.x, n.position.y, P.pos.z); return near; }
+function updStools(dt) { if (PL.hopT > 0) PL.hopT -= dt; let dirty = false; for (let i = 0; i < STO.length; i++) { const s = STO[i];
+    if (s.pushT > 0) s.pushT -= dt; if (s.push > 0 && s.st === 'up') { s.calm = (s.calm || 0) + dt; if (s.calm > 7) { s.push = 0; s.calm = 0; } }
+    if (s.wobA) { s.wobPh = (s.wobPh || 0) + dt * 17; s.wobA *= Math.exp(-dt * 2.2); s.wob = Math.sin(s.wobPh) * s.wobA; if (s.wobA < 0.004) { s.wobA = 0; s.wob = 0; } dirty = true; W.STOOLM.set(i); }
+    if (s.st === 'falling') { s.fallT += dt; const k = Math.min(1, s.fallT / 0.45); s.ang = 1.36 * k * k; s.wob = k >= 1 ? Math.sin(s.fallT * 30) * 0.03 * Math.exp(-(s.fallT - 0.45) * 8) : 0; if (s.fallT > 0.8) { s.st = 'down'; s.wob = 0; } W.STOOLM.set(i); }
+    if (s.st === 'raising') { s.fallT += dt; s.ang = 1.36 * Math.max(0, 1 - s.fallT / 0.4); if (s.ang <= 0) { s.ang = 0; s.st = 'up'; s.c[4] = s.h + 0.08; s.push = 0; } W.STOOLM.set(i); } } }
+function stoolContact(dt) { if (PL.stool || PL.hopT > 0) return; const spd = Math.hypot(P.vel.x, P.vel.z); if (spd < 1.0) return; for (const s of STO) { if (s.st !== 'up' || s.pushT > 0) continue; const dx = s.x - P.pos.x, dz = s.z - P.pos.z, d = Math.hypot(dx, dz); if (d > 0.2 + RH + 0.06) continue;
+  // empujón: sólo si va hacia el taburete
+  if ((P.vel.x * dx + P.vel.z * dz) / (spd * d) < 0.55) continue; s.pushT = 0.7; s.calm = 0; s.push++; s.dir = [dx / d, dz / d]; const n = s.push;
+  if (n === 1) { s.wobA = 0.09; s.wobPh = 0; say(ant, pick(['Uy…', 'Ups.']), { pri: 2 }); }
+  else if (n === 2) { s.wobA = 0.2; s.wobPh = 0; const near = protest(s, ['¡Ojo, que lo tiras!', '¡Cuidado con el taburete!', 'Chiquillo, ¡que se cae!'], ''); }
+  else { s.wobA = 0; s.wob = 0; knock(s); } } }
+function climb(s) { PL.stool = s; PL.onStoolT = 0; PL.dance = false; P.vel.set(0, 0, 0); P.pos.set(s.x, P.pos.y, s.z); done('taburete'); say(ant, pick(['¡Desde aquí se ve todo!', '¡Mirad quién manda ahora!', '¡Que me vea Córdoba entera!']), { pri: 2, cls: 'me' }); }
+function hopOff(I) { const s = PL.stool; PL.stool = null; PL.hopT = 0.6; const a = I && (Math.abs(I.x) + Math.abs(I.z) > 0.1) ? Math.atan2(V3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw)).multiplyScalar(I.x).add(V3(-Math.sin(cam.yaw), 0, -Math.cos(cam.yaw)).multiplyScalar(-I.z)).x, V3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw)).multiplyScalar(I.x).add(V3(-Math.sin(cam.yaw), 0, -Math.cos(cam.yaw)).multiplyScalar(-I.z)).z) : P.yaw;
+  P.pos.x = s.x + Math.sin(a) * 0.85; P.pos.z = s.z + Math.cos(a) * 0.85; collide(P.pos); P.yaw = a; }
+// ---------- guardarropa ----------
+const LOST = [[0.6, -2.9], [4.2, -2.3], [-3.1, -4.9], [6.2, -4.6], [2.9, 2.2], [-1.0, 5.2], [5.3, 6.1], [-4.8, 4.6], [3.4, -5.6], [-0.4, -6.5]];
+const ticketMesh = (() => { const c = document.createElement('canvas'); c.width = 64; c.height = 96; const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.24), new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.visible = false; m.userData.noCam = true; scene.add(m);
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.42, 20), new THREE.MeshBasicMaterial({ color: '#ffe27a', transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false })); glow.rotation.x = -Math.PI / 2; glow.position.y = -0.003; m.add(glow); glow.rotation.x = 0;
+  m.draw = n => { const x = c.getContext('2d'); x.fillStyle = '#ffd23a'; x.fillRect(0, 0, 64, 96); x.fillStyle = '#111'; x.font = 'bold 13px Arial'; x.textAlign = 'center'; x.fillText('HANGAR', 32, 22); x.font = 'bold 34px Arial Black, sans-serif'; x.fillText(n, 32, 66); x.setLineDash([4, 3]); x.strokeRect(4, 4, 56, 88); t.needsUpdate = true; }; return m; })();
+function loseTicket() { if (!N.ticket || N.ticket.lost) return; N.ticket.lost = true; const [x, z] = pick(LOST); ticketMesh.draw(N.ticket.n); ticketMesh.position.set(x, 0.015, z); ticketMesh.visible = true; evt('😱 ¡Se te ha caído el ticket del guardarropa!', 3.4); say(ant, '¿¿Y mi ticket?? ¡Ozú!', { pri: 4, cls: 'me' }); addTask('ticket', true); updInv(); }
+function cloak() { const v = VANE.n; if (N.jacket) { N.jacket = false; N.ticket = { n: Math.random() < 0.06 ? 90 : 1 + Math.floor(Math.random() * 120), lost: false }; if (N.ticket.n === 90) N.ticket.n = 90; say(v, `Toma, el ${N.ticket.n}. ¡No lo pierdas, que luego todo son dramas!`, { pri: 3, dur: 5 }); sfx('clink'); done('chaqueta'); if (N.ticket.n === 90) setTimeout(() => evt('🎟 Ticket nº 90… este número trae suerte. Guárdalo.', 3.5), 2500); updInv(); return; }
+  if (N.ticket && !N.ticket.lost) { N.jacket = true; say(v, pick(['Aquí tienes tu chaqueta, cariño. ¡Abrígate, que fuera refresca!', 'Tu chaqueta. Huele un poco a tabaco, pero no es culpa mía.']), { pri: 3, dur: 5 }); if (N.ticket.n === 90) { fama(15, '¡Ticket nº 90: premio de Vane!'); say(v, '¡El 90! Toma, chupito de la casa 🎉', { pri: 3, dur: 5 }); } N.ticket = null; done('recoger'); updInv(); return; }
+  say(v, pick(['Sin ticket no hay chaqueta, chiquillo. Búscalo.', '¿Ticket? Sin ticket no te puedo dar nada, que luego me la lían.', 'Ay, otro sin ticket… búscalo por la sala, anda.']), { pri: 3, dur: 5, cls: 'w' }); }
+// ---------- encargos (lista de 3, sin ventanas emergentes) ----------
+const nm = () => antCfg.name;
+const TASK = {
+  chaqueta: { t: () => 'Deja la chaqueta en el guardarropa (Vane)', f: 10, av: () => N.jacket && N.gm < 300 },
+  tercio: { t: () => 'Pide un tercio en la barra… sin colarte', f: 10, av: () => true },
+  saludar: { t: () => `Saluda a 3 de la pandilla (${N.greet || 0}/3)`, f: 10, av: () => true },
+  foto: { t: () => 'Foto con el rótulo HANGAR de la fachada', f: 12, av: () => true },
+  primera: { t: () => 'Ponte en primera fila antes del concierto', f: 20, av: () => N.gm < TL.cs - 4 },
+  cancion: { t: () => 'Pídele a Álvaro tu canción', f: 15, av: () => N.gm < TL.cs || N.gm > TL.bisE },
+  ronda: { t: () => `Invita a una ronda a la pandilla (${N.given || 0}/3)`, f: 20, av: () => true },
+  taburete: { t: () => 'Súbete a un taburete', f: 8, av: () => true },
+  bano: { t: () => 'Ve al baño (al que te toca)', f: 5, av: () => true },
+  otra: { t: () => '¡Pide «otra» en primera fila!', f: 15, av: () => N.gm >= TL.ce && N.gm < TL.bis },
+  bailar: { t: () => `Baila en la pista con Álvaro (${Math.floor(N.danceT || 0)}/8 s)`, f: 15, av: () => N.gm >= TL.bisE },
+  recoger: { t: () => `Recoge tu chaqueta antes de las 06:00`, f: 15, av: () => !N.jacket && N.gm >= 380 },
+  ticket: { t: () => `Encuentra tu ticket (nº ${N.ticket ? N.ticket.n : '?'})`, f: 6, av: () => N.ticket && N.ticket.lost },
+  levantar: { t: () => 'Levanta un taburete tirado', f: 5, av: () => STO.some(s => s.st === 'down') } };
+const ORDER = ['chaqueta', 'tercio', 'saludar', 'primera', 'foto', 'cancion', 'ronda', 'taburete', 'bano', 'otra', 'bailar', 'recoger', 'levantar'];
+const tasksEl = $('tasks');
+function renderTasks() { [...tasksEl.querySelectorAll('div')].forEach(d => d.remove()); for (const id of N.tasks) { const d = document.createElement('div'); d.dataset.id = id; d.innerHTML = TASK[id].t() + `<em>+${TASK[id].f}</em>`; if (N.fresh && N.fresh.has(id)) d.classList.add('new'); tasksEl.appendChild(d); } N.fresh = new Set(); }
+function addTask(id, top) { if (N.done.has(id) && id !== 'ticket') return; if (N.tasks.includes(id)) return; if (top) { N.tasks.unshift(id); if (N.tasks.length > 3) N.tasks.pop(); } else N.tasks.push(id); (N.fresh = N.fresh || new Set()).add(id); renderTasks(); }
+function refill() { if (N.tasks.length >= 3) return; for (const id of ORDER) { if (N.tasks.length >= 3) break; if (N.done.has(id) || N.tasks.includes(id) || N.closing.has(id)) continue; if (TASK[id].av()) addTask(id); } }
+function finishTask(id, ok) { const el = tasksEl.querySelector(`div[data-id="${id}"]`); if (el) el.classList.add(ok ? 'ok' : 'ko'); N.closing.add(id); setTimeout(() => { N.closing.delete(id); N.tasks = N.tasks.filter(x => x !== id); renderTasks(); refill(); }, 1400); }
+function done(id) { if (!N.on || N.done.has(id) && id !== 'ticket') return; N.done.add(id); N.stats.tasks++; fama(TASK[id].f, TASK[id].t().replace(/\s*\(.*\)$/, '')); sfx('ding'); if (N.tasks.includes(id)) finishTask(id, true); }
+function fail(id) { if (!N.tasks.includes(id) || N.closing.has(id)) return; N.done.add(id); finishTask(id, false); }
+// ---------- saludar / dar botellín / charlar ----------
+const GREET = { gen: ['¡Hombreee! ¿Qué pasa, {n}?', '¡Mira quién ha venido! ¡Ozú, {n}!', '¡{n}! Creía que ya no salías de casa.', 'Qué bien te veo, {n}. ¿Te has hecho algo?', '¡{n}! Ya pensaba que no venías, como el concierto.'],
+  pijo: ['Holaaa, ¿qué tal? Qué fuerte verte aquí.', 'Vengo de El Brillante, que había una cena…', 'Ay, qué mono vienes. ¿Es nuevo?'],
+  boomer: ['¿Esto es lo que se lleva ahora? En mis tiempos esto era el Long Play.', 'Yo a esta banda la vi en el 96. Bueno, a otra parecida.'] };
+const CHAT = ['Ozú, qué calor hace aquí dentro, chiquillo.', 'Dicen que el concierto empieza a las once… ¿de qué día?', 'He aparcado en Ciudad Jardín. Mañana vengo a por el coche.', 'El baño, como siempre: sin pestillo y sin papel.', 'Hoy hay más gente de 40 que en una boda.', 'Esto es como un after pero con canas.', 'Yo he venido por la música… y porque mi mujer está de viaje.', 'Mañana madrugo. Mentira, mañana no madrugo.'];
+function npcNear(maxD) { let best = null, bd = maxD; for (const n of NPCS) { const d = Math.hypot(n.position.x - P.pos.x, n.position.z - P.pos.z); if (d < bd) { bd = d; best = n; } } return best; }
+const npcName = n => ROSTER[PJ.indexOf(n)].name;
+function greet(n) { N.greeted = N.greeted || new Set(); const first = !N.greeted.has(n); n.rotation.y = Math.atan2(P.pos.x - n.position.x, P.pos.z - n.position.z);
+  if (first) { N.greeted.add(n); N.greet = N.greeted.size; say(ant, pick(['¡Hombreee!', '¡Qué pasa, ' + npcName(n) + '!', '¡Ozú, quién está aquí!']), { pri: 2, cls: 'me' }); setTimeout(() => say(n, pick(Math.random() < 0.6 ? GREET.gen : Math.random() < 0.5 ? GREET.pijo : GREET.boomer).replace('{n}', nm()), { pri: 3, dur: 5 }), 700); fama(2); if (N.greet >= 3) done('saludar'); else renderTasks(); }
+  else say(n, pick(CHAT), { pri: 2, dur: 5 }); }
+function giveBot(n) { PL.round--; if (!n.userData.bot) n.userData.bot = holdIn(n, 'botellin'); sfx('clink'); N.given = (N.given || 0) + 1; say(n, pick(['¡Olé! ¡Eso es un amigo!', '¡Gracias, chiquillo! A la próxima invito yo… o no.', '¡Un botellín! Ozú, qué detalle.', '¡Esa es mi ' + (isGirl() ? 'niña' : 'niño') + '!']), { pri: 3, dur: 4.6, cls: 'g' }); fama(3); renderTasks(); if (N.given >= 3) done('ronda');
+  if (PL.round <= 0) { dropDrink(); } else updInv(); }
+// ---------- Álvaro: pedir canción (versión simple; la fase 3 añade dedicatorias y reacción de la pista) ----------
+function askSong() { const now = N.t; PL.req = PL.req.filter(t => now - t < 75); PL.req.push(now); const k = PL.req.length;
+  if (k >= 3) { say(alv, '¡Que no soy una gramola, ' + nm() + '! ¡ABAJO de la cabina!', { pri: 5, dur: 5, cls: 'w' }); P.pos.set(-5.3, 0, -5.9); P.vel.set(0, 0, 0); PL.req = []; expl(12, 'Álvaro te ha echado de la cabina'); sfx('boo'); return; }
+  const nx = (songI + 1) % SONGS.length; if (AC) { songI = nx - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.1; }
+  say(alv, k === 1 ? `¡Esta va por ${nm()}! «${SONGS[nx].n}»` : 'Vaaale… pero es la última, ¿eh?', { pri: 4, dur: 5 }); done('cancion'); sfx('cheer'); }
+// ---------- baños ----------
+const inRect = (x, z, r) => x > r[0] && x < r[2] && z > r[1] && z < r[3];
+function updWC(dt) { if (EXPLORE || !N.on) return; PL.wcCool -= dt; const x = P.pos.x, z = P.pos.z; const g = inRect(x, z, [W.P.banoChicas[0], W.P.banoChicas[1], W.P.banoChicas[2], W.P.banoChicas[3]]), b = inRect(x, z, W.P.banoChicos);
+  if (!g && !b) { PL.inWC = 0; return; } PL.inWC += dt; const mine = isGirl() ? g : b;
+  if (mine) { if (PL.inWC > 1.2 && !N.done.has('bano')) { done('bano'); say(ant, pick(['Ozú… sin pestillo, como siempre.', 'Ni papel ni pestillo. El Hangar de toda la vida.', 'Aquí dentro hace más calor que en la pista.']), { pri: 3, cls: 'me' }); } return; }
+  if (!isGirl() && g && PL.inWC > 0.5) { // chico en el de chicas: gritos y fuera
+    const w = XWC[0]; say(w.n, pick(['¡¡FUERA DE AQUÍ!!', '¡GUARRO! ¡Que es el de chicas!', '¡Sal ahora mismo, malaje!']), { pri: 5, cls: 'w', dur: 5 }); sfx('boo'); setTimeout(() => say(ant, '¡Perdón, perdón! ¡Que me he equivocado!', { pri: 4, cls: 'me' }), 600);
+    P.pos.set(-9.2, 0, -7.5); P.vel.set(0, 0, 0); P.yaw = Math.PI / 2; PL.inWC = 0; expl(18, 'Te han echado del baño de chicas'); fama(-5); if (Math.random() < 0.3) loseTicket(); return; }
+  if (isGirl() && b && PL.inWC > 0.6 && PL.wcCool <= 0) { PL.wcCool = 40; const w = XWC[1]; say(w.n, pick(['👏👏 ¡Olé! ¡Bienvenida!', '¡Pasa, pasa, reina! 👏', '¡Por fin alguien con estilo en este baño!']), { pri: 4, cls: 'g', dur: 5 }); sfx('clap'); fama(8, 'Aplausos en el baño de chicos'); } }
+// ---------- concierto, bis y sesión ----------
+function bandArrive() { BAND.forEach((w, i) => { w.n.visible = true; w.n.position.set(1.75 + (i - 1) * 0.7, 0, 5.5 + i * 0.6); w.y = 0; const [x, z, f] = BAND_SPOT[i]; walkTo(w, [[1.75 + (i - 1) * 0.5, 1.0], [5.6, -0.8], [7.4, -2.6 - i * 0.2], [x, z]], q => { q.face = f; }, 1.35); }); say(BAND[0].n, '¡Buenas, Córdoba! Bueno… ahora probamos sonido.', { pri: 3, dur: 5 }); evt('🚐 Ha llegado la banda… tarde', 3); }
+function updNight(dt) { if (!N.on || N.ended) return; N.t += dt; const gm0 = N.gm; N.gm = N.t / NIGHT_LEN * 480; const gm = N.gm; const cross = v => gm0 < v && gm >= v;
+  if (cross(TL.band) && !N.onTime) bandArrive();
+  if (cross(TL.cs)) { N.live = true; for (const w of BAND) w.dance = true; evt(N.onTime ? '🤯 ¡El concierto empieza A SU HORA! Esto no pasa nunca.' : '🎸 ¡Empieza el concierto! (anunciado a las 23:00)', 3.6); sfx('cheer'); if (AC) { songI = -1; song = null; stepN = 0; nextStep = AC.currentTime + 0.1; } say(BAND[0].n, '¡Buenas noches, Hangar! ¡Somos Los Faros!', { pri: 5, dur: 5 });
+    const front = P.pos.x > 5.2 && P.pos.z > -7.3 && P.pos.z < -0.2 && inside(P.pos); if (front) done('primera'); else fail('primera'); }
+  if (cross(TL.ce)) { N.live = false; for (const w of BAND) w.dance = false; evt('👏 ¡OTRA! ¡OTRA! ¡OTRA!', 3); sfx('clap'); NPCS.slice(0, 2).forEach((n, i) => setTimeout(() => say(n, pick(['¡OTRA! ¡OTRA!', '¡Una más, chiquillos!', '¡Que no se vayan!']), { pri: 3 }), i * 600)); }
+  if (cross(TL.bis)) { N.live = true; for (const w of BAND) w.dance = true; evt('🎸 ¡El bis!', 2.5); sfx('cheer'); say(BAND[0].n, '¡Venga, la última! ¡Que mañana curráis!', { pri: 4 }); }
+  if (cross(TL.bisE)) { N.live = false; BAND.forEach((w, i) => { w.dance = false; walkTo(w, [[10.6, -6.5 + i * 0.3]], q => { q.face = Math.PI; }); }); evt('🎧 Sesión de Álvaro hasta el cierre', 3); say(alv, '¡Ahora mando yo! ¡A bailar, Córdoba!', { pri: 4, dur: 5 }); }
+  if (cross(TL.last)) { evt('🍾 ¡Última ronda! Se encienden las luces…', 3.4); say(STAFF[1].n, '¡Última ronda, señores! ¡Que nos vamos!', { pri: 4, dur: 5 }); }
+  if (gm >= TL.end) endNight(false);
+  N.exp = Math.max(0, N.exp - dt * 0.9);
+  // estar en la pista bailando en la sesión
+  if (gm >= TL.bisE && PL.dance && inside(P.pos) && P.pos.x > -1.5 && P.pos.x < 7.5 && P.pos.z > -5.6 && P.pos.z < -1.9) { N.danceT = (N.danceT || 0) + dt; if (N.danceT >= 8) done('bailar'); }
+  if (N.live && PL.dance && P.pos.x > 4.5 && inside(P.pos)) fama(dt * 0.8);
+  // taburete: subido mucho rato dentro → Manolo protesta
+  if (PL.stool) { PL.onStoolT += dt; if (PL.stoolFama < 10) { PL.stoolFama += dt * 1.6; fama(dt * 1.6); } if (PL.stool.inside && PL.onStoolT > 4) { expl(dt * 3.2); PL.warnT -= dt; if (PL.warnT <= 0) { PL.warnT = 6; say(STAFF[1].n, pick(['¡Bájate del taburete, chiquillo!', '¡Eh, tú! ¡Que eso no es un escenario!', '¡Del taburete abajo, que te conozco!']), { pri: 4, cls: 'w', dur: 4.6 }); } } }
+  // hora de recoger la chaqueta
+  if (!N.jacket && gm >= 380) refill();
+  if (gm >= TL.end - 0.01) return; if (Math.floor(gm0 / 10) !== Math.floor(gm / 10)) { refill(); renderTasks(); } }
+function expel() { if (N.ended) return; const s = STAFF[1]; say(s.n, pick(['¡Hasta aquí hemos llegado! ¡A la calle!', '¡Fuera! Y no vuelvas hasta el sábado.', 'Mira, ' + nm() + ', vete a casa, anda.']), { pri: 9, cls: 'w', dur: 5 }); sfx('boo'); evt('🚪 ¡Te han echado del Hangar!', 3);
+  setTimeout(() => { P.pos.set(1.75, 0, 8.7); P.vel.set(0, 0, 0); P.yaw = 0; PL.stool = null; if (PL.q >= 0) qLeave('P'); }, 1200); setTimeout(() => endNight(true), 2600); N.ended = 'exp'; }
+const TITLES = () => { const g = isGirl(); return [[0, 'Pringad' + oa() + ' de la terraza'], [25, 'Boomer honorífic' + oa()], [55, 'Alma de la pista'], [85, g ? 'Reina de la Avenida' : 'Rey de la Avenida'], [120, 'Leyenda del Hangar']]; };
+function endNight(expelled) { if (N.done_) return; N.done_ = true; N.ended = true; N.on = false; closeBar(); const g = isGirl(); let title;
+  if (expelled) title = N.gm < TL.bisE ? (g ? 'Expulsada antes del bis' : 'Expulsado antes del bis') : (g ? 'Expulsada en plena sesión' : 'Expulsado en plena sesión'); else title = TITLES().filter(t => N.fama >= t[0]).pop()[1];
+  if (!expelled && !N.jacket) title += ' (y sin chaqueta)';
+  $('endWhy').textContent = expelled ? `¡Te han echado a las ${hhmm(N.gm)}! 🚪` : '¡Echamos el cierre! 06:00 🌅'; $('endTitle').textContent = title;
+  const best = store.get('hangar_best', 0), sc = Math.round(N.fama), nb = sc > best; if (nb) store.set('hangar_best', sc);
+  $('endStats').innerHTML = `${nm()} · <b>${sc}</b> de FAMA · ${N.stats.tasks} encargos · ${N.stats.drinks} bebidas · ${N.stats.stools} taburetes por los suelos · ${N.stats.skips} coladas en la barra<br>${nb ? '🏆 ¡Nuevo récord!' : 'Récord: ' + best}`;
+  setTimeout(() => { STATE = 'end'; $('hud').classList.remove('on'); $('end').classList.add('on'); }, expelled ? 400 : 900); }
+// ---------- acción contextual ----------
+let ACT = null; const promptEl = $('prompt'), bAct = $('bAct');
+function act(k, lab, fn, warn) { return { k, lab, fn, warn }; }
+function findAction() { const x = P.pos.x, z = P.pos.z, ins = inside(P.pos);
+  if (PL.stool) return act('baja', 'Bajarse del taburete', () => hopOff(null));
+  if (drkOpen) return null;
+  if (PL.q >= 0) return PL.q === 0 ? null : act('cola', `En la cola (${PL.q + 1}º)… salir de la cola`, () => qLeave('P'));
+  const fs = stoolNear(1.1, 'down'); if (fs) return act('lev', 'Levantar el taburete', () => { fs.st = 'raising'; fs.fallT = 0; done('levantar'); fama(3); N.exp = Math.max(0, N.exp - 6); say(ant, 'Ea, como nuevo.', { pri: 2, cls: 'me' }); });
+  if (PL.round > 0) { const n = npcNear(1.7); if (n) return act('dar', 'Dar un botellín a ' + npcName(n), () => giveBot(n)); }
+  // Álvaro (desde la cabina o delante de ella)
+  if (Math.hypot(x - alv.position.x, z - alv.position.z) < 2.4 && (P.pos.y > 0.4 || x > -4.0)) return act('dj', 'Pedirle una canción a Álvaro', askSong);
+  if (VANE && x > -6.6 && x < -5.4 && z > -6.6 && z < -5.25) return act('vane', N.jacket ? 'Dejar la chaqueta' : (N.ticket && !N.ticket.lost ? 'Recoger la chaqueta (ticket ' + N.ticket.n + ')' : 'Pedir la chaqueta… sin ticket'), cloak);
+  // barra: cola o colarse
+  const atBar = ins && z < -6.25 && z > -7.4 && x > -4.1 && x < 6.7;
+  if (!EXPLORE && N.on && qBusy() && Q_.line.length) { const [ex, ez] = qPos(Q_.line.length); if (Math.hypot(x - ex, z - ez) < 0.75) return act('cola', 'Ponerse a la cola', () => { qJoin('P'); N.stats.queue++; }); }
+  if (atBar && !PL.drink) { const busy = !EXPLORE && N.on && Q_.line.length > 0; return act('bar', busy ? 'Pedir… colándote (¡hay cola!)' : 'Pedir en la barra', () => { if (busy) skipQueue(); openBar(busy); }, busy); }
+  if (!EXPLORE && N.on && ins) { const n = npcNear(1.6); if (n) return act('hola', ((N.greeted && N.greeted.has(n)) ? 'Charlar con ' : 'Saludar a ') + npcName(n), () => greet(n)); }
+  if (N.on && N.live && x > 5.6 && ins && N.gm >= TL.ce && N.gm < TL.bis && !N.done.has('otra')) return act('otra', '¡OTRA! ¡OTRA!', () => { done('otra'); say(ant, '¡¡OTRAAA!!', { pri: 3, cls: 'me' }); sfx('cheer'); });
+  if (N.on && x > 5.6 && ins && N.gm >= TL.ce && N.gm < TL.bis && !N.done.has('otra')) return act('otra', '¡OTRA! ¡OTRA!', () => { done('otra'); say(ant, '¡¡OTRAAA!!', { pri: 3, cls: 'me' }); sfx('cheer'); });
+  const st = stoolNear(0.95); if (st) return act('sube', 'Subirse al taburete', () => climb(st));
+  if (!ins && x > 3.6 && x < 10.4 && z > 3.4 && z < 9.0) return act('foto', '📸 Foto con el rótulo', () => { P.yaw = Math.PI; flash(); sfx('shutter'); done('foto'); say(ant, pick(['¡Pa’l Insta!', 'Que salga el rótulo, ¿eh?', 'Esta de perfil, que es mi lado bueno.']), { pri: 2, cls: 'me' }); });
+  if (PL.drink && PL.kind !== 'ronda') return act('beber', 'Beber', sip);
+  if (ins) return act('baile', PL.dance ? 'Dejar de bailar' : 'Bailar', () => { PL.dance = !PL.dance; });
+  return null; }
+function skipQueue() { N.stats.skips++; expl(14, '¡Te has colado en la barra!'); fama(-3); const near = XQ.filter(w => Q_.line.includes(w)).map(w => w.n); const ls = ['¡Eh, la cola, malaje!', 'Ozú, qué cara más dura…', '¡Que llevamos aquí desde el concierto!', 'Mira el listo este…', '¿Tú de qué vas, chiquillo?']; near.slice(0, 2).forEach((n, i) => { n.rotation.y = Math.atan2(P.pos.x - n.position.x, P.pos.z - n.position.z); setTimeout(() => say(n, ls[(i + (Math.random() * 3 | 0)) % ls.length], { pri: 4, cls: 'w' }), i * 500); }); for (const w of XQ) if (Q_.line.includes(w)) w.face = Math.atan2(P.pos.x - w.n.position.x, P.pos.z - w.n.position.z); }
+function sip() { if (!PL.drink) return; PL.sipT = 1.0; PL.sips--; fama(1); if (PL.sips <= 0) { setTimeout(() => { if (PL.kind === null) return; N.stats.drinks++; const k = PL.kind; dropDrink(); say(ant, k === 'agua' ? 'Hidratación, que mañana es mañana.' : pick(['¡Seco!', 'Otro muerto.', 'Ozú, cómo entra.']), { pri: 2, cls: 'me' }); if (N.stats.drinks === 4) setTimeout(() => say(ant, 'Ozú… ¿el Hangar siempre ha dado vueltas?', { pri: 3, cls: 'me' }), 1500); updInv(); }, 900); } else updInv(); }
+function doAction() { if (STATE !== 'play') return; startAudio(); const a = ACT; if (a) a.fn(); }
+addEventListener('keydown', e => { if (e.code === 'KeyE' || e.code === 'Enter') { e.preventDefault(); doAction(); } else if (drkOpen && /^Digit[1-6]$/.test(e.code)) order(MENU[+e.code.slice(5) - 1][0]); else if (e.code === 'Escape') closeBar(); });
+bAct.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); doAction(); });
+function updAction() { const a = STATE === 'play' ? findAction() : null; ACT = a; const lab = a ? a.lab : ''; if (lab !== updAction.l) { updAction.l = lab; if (a) { promptEl.innerHTML = (TOUCH ? '' : '<kbd>E</kbd>') + lab; promptEl.style.display = 'block'; promptEl.classList.toggle('warn', !!a.warn); bAct.textContent = lab.length > 22 ? lab.split(' ').slice(0, 3).join(' ') + '…' : lab; bAct.classList.add('ready'); } else { promptEl.style.display = 'none'; bAct.textContent = 'ACCIÓN'; bAct.classList.remove('ready'); } } }
+// ---------- ganchos en el jugador ----------
+HOOK.input = (I, dt) => { if (N.stats.drinks >= 4 && (Math.abs(I.x) + Math.abs(I.z) > 0.1)) { const k = Math.min(0.45, (N.stats.drinks - 3) * 0.12); return { x: I.x + Math.sin(T * 1.7) * k, z: I.z + Math.cos(T * 1.3) * k * 0.6, run: I.run }; } return I; };
+HOOK.move = (dt, I) => { const mv = Math.abs(I.x) + Math.abs(I.z) > 0.25;
+  if (PL.stool) { if (mv && PL.onStoolT > 0.35) { hopOff(I); return false; } const s = PL.stool; P.pos.x = s.x; P.pos.z = s.z; P.pos.y = Math.min(s.h + 0.08, P.pos.y + dt * 4); P.vel.set(0, 0, 0); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: 0, grounded: true, dance: true }); return true; }
+  if (PL.q >= 0) { if (mv) { qLeave('P'); return false; } const [tx, tz] = PL.qT || qPos(PL.q); const dx = tx - P.pos.x, dz = tz - P.pos.z, d = Math.hypot(dx, dz); let sp = 0; if (d > 0.05) { const st = Math.min(d, 1.4 * dt); P.pos.x += dx / d * st; P.pos.z += dz / d * st; P.yaw += angDiff(P.yaw, Math.atan2(dx, dz)) * Math.min(1, dt * 8); sp = 0.55; } else P.yaw += angDiff(P.yaw, Math.PI) * Math.min(1, dt * 6);
+    P.vel.set(0, 0, 0); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: sp, grounded: true }); if (PL.q === 0 && d < 0.1 && !drkOpen && !Q_.srv && !PL.drink) openBar(false); return true; }
+  if (mv && PL.dance) PL.dance = false; return false; };
+HOOK.after = dt => { stoolContact(dt); if (ticketMesh.visible && Math.hypot(P.pos.x - ticketMesh.position.x, P.pos.z - ticketMesh.position.z) < 0.6) { ticketMesh.visible = false; N.ticket.lost = false; done('ticket'); N.done.delete('ticket'); evt('🎟 ¡Ticket recuperado!', 2.4); say(ant, '¡Mi ticket! Ozú, qué susto.', { pri: 3, cls: 'me' }); updInv(); } };
+HOOK.upd = dt => { updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC]) updW(w, dt); if (VANE) updW(VANE, dt);
+  if (PL.dance && !PL.stool && STATE === 'play') ant.userData.update(dt * 0.001, { speed: 0, grounded: true, dance: true });
+  if (PL.sipT > 0) { PL.sipT -= dt; const a = ant.userData.arms[1]; const k = Math.sin(Math.min(1, (1 - PL.sipT) / 1) * Math.PI); a.rotation.x = -2.3 * k; a.rotation.z = -0.35 * k; }
+  if (drkOpen && (Math.hypot(P.pos.x - drkOpen.x, P.pos.z - (-6.8)) > 1.8 || P.pos.z > -5.0) && PL.q < 0) closeBar();
+  if (ticketMesh.visible) { ticketMesh.children[0].material.opacity = 0.25 + 0.2 * Math.sin(T * 5); }
+  evtT -= dt; if (evtT <= 0) $('evt').classList.remove('on'); updAction(); if (N.on) updHUD(); };
+HOOK.ui = dt => updBubs(dt);
+HOOK.ground = (x, z, g) => PL.stool ? PL.stool.h + 0.08 : g;
+const hud = {}; function updHUD() { const c = hhmm(N.gm); if (c !== hud.c) { hud.c = c; $('clk').firstChild.textContent = c; } const ph = phaseName(N.gm); if (ph !== hud.ph) { hud.ph = ph; $('phase').textContent = ph; }
+  const f = Math.min(100, N.fama / 1.2), e = N.exp; if (Math.abs(f - (hud.f || -1)) > 0.4) { hud.f = f; $('bFama').firstChild.style.width = f + '%'; } if (Math.abs(e - (hud.e || -1)) > 0.4) { hud.e = e; $('bExp').firstChild.style.width = e + '%'; $('bExp').classList.toggle('hot', e > 66); } }
+// ---------- empezar / reiniciar la noche ----------
+function resetNight() { clearBubs(); closeBar(); dropDrink(); PL.stool = null; PL.q = -1; PL.dance = false; PL.req = []; PL.stoolFama = 0; Object.assign(N, { on: false, t: 0, gm: 0, fama: 0, exp: 0, tasks: [], done: new Set(), closing: new Set(), fresh: new Set(), stats: { drinks: 0, stools: 0, queue: 0, skips: 0, tasks: 0 }, ticket: null, jacket: true, ended: false, done_: false, live: false, greet: 0, given: 0, greeted: new Set(), danceT: 0, onTime: false });
+  ticketMesh.visible = false; STO.forEach((s, i) => { s.st = 'up'; s.ang = 0; s.wob = 0; s.wobA = 0; s.push = 0; s.c[4] = s.h + 0.08; W.STOOLM.set(i); });
+  for (const n of NPCS) { if (n.userData.bot) { n.userData.bot.parent.remove(n.userData.bot); n.userData.bot = null; } }
+  Q_.line.length = 0; Q_.srv = null; Q_.serveT = 3; XQ.forEach((w, i) => { w.away = 0; if (w.bottle) { w.bottle.parent.remove(w.bottle); w.bottle = null; } w.path = []; w.n.position.set(0.4 + i * 1.6, 0, -3.2 - i * 0.3); w.face = 0; });
+  BAND.forEach((w, i) => { w.n.visible = false; w.path = []; w.dance = false; }); }
+HOOK.start = () => { if (EXPLORE) { document.body.classList.remove('juego'); return; } resetNight(); N.on = true; document.body.classList.add('juego'); N.onTime = Math.random() < 0.08 || Q.get('puntual') === '1'; if (N.onTime) { TL.cs = 62; TL.ce = 160; TL.bis = 172; TL.bisE = 192; BAND.forEach((w, i) => { const [x, z, f] = BAND_SPOT[i]; w.n.visible = true; w.n.position.set(x, 0.6, z); w.y = 0.6; w.face = f; }); } else Object.assign(TL, { cs: 150, ce: 250, bis: 262, bisE: 282 });
+  P.pos.set(1.75, 0, 6.2); P.yaw = Math.PI; P.vel.set(0, 0, 0); cam.yaw = 0; refill(); renderTasks(); updInv(); evt('🌙 22:00 · Abren las puertas del Hangar', 3); updHUD(); };
+$('again').addEventListener('click', () => { $('end').classList.remove('on'); $('hud').classList.add('on'); STATE = 'play'; HOOK.start(); });
+$('change').addEventListener('click', () => { $('end').classList.remove('on'); $('menu').classList.add('on'); STATE = 'menu'; document.body.classList.remove('juego'); resetNight(); });
+window.NOCHE = { N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
+
 // menú de entrada
 function choose(i) { selIdx = i; ant = PJ[i]; antCfg = ROSTER[i]; if (!EXPLORE) store.set('hangar_pj', i); placeNPCs(); retag(); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.visible = true; }
 if (!EXPLORE) { // retratos de la pandilla para la selección (como en La Curva)
@@ -1671,16 +1995,16 @@ if (!EXPLORE) { // retratos de la pandilla para la selección (como en La Curva)
     renderer.render(ps, pc); ox.clearRect(0, 0, PW, PH); ox.drawImage(renderer.domElement, 0, 0, PW, PH); const url = oc.toDataURL('image/jpeg', 0.86); scene.add(n); n.position.copy(op); n.rotation.set(0, orr, 0);
     const c = document.createElement('div'); c.className = 'card' + (i === selIdx ? ' sel' : ''); c.innerHTML = `<img alt="" src="${url}"><b>${ROSTER[i].name}</b>`; c.onclick = () => { selIdx = i; [...grid.children].forEach((e, k) => e.classList.toggle('sel', k === i)); startAudio(); }; c.ondblclick = () => enter(); grid.appendChild(c); });
   renderer.setPixelRatio(dpr); renderer.setSize(innerWidth, innerHeight); fitView(); }
-function enter() { startAudio(); choose(selIdx); STATE = 'play'; $('menu').classList.remove('on'); $('hud').classList.add('on'); }
+function enter() { startAudio(); choose(selIdx); STATE = 'play'; $('menu').classList.remove('on'); $('hud').classList.add('on'); if (HOOK.start) HOOK.start(); }
 $('go').addEventListener('click', e => { e.preventDefault(); enter(); });
 if (EXPLORE) document.body.classList.add('explorar');
-if (TEST) { $('menu').classList.remove('on'); $('hud').classList.add('on'); $('hint').classList.add('off'); }
+if (TEST) { $('menu').classList.remove('on'); $('hud').classList.add('on'); $('hint').classList.add('off'); if (HOOK.start) HOOK.start(); }
 // precompila y arranca
 renderer.compile(scene, camera); $('load').classList.remove('on'); if (!TEST) $('menu').classList.add('on');
 loop();
 // ---------- API de pruebas ----------
 window.GAME = { P, cam, W, get ant() { return ant; }, PJ, NPCS, STAFF, MODE, selIdx: () => selIdx, choose(i) { choose(i); }, alv, camera, renderer,
-  step(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); renderer.render(scene, topCam || camera); updTags(); },
+  step(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); renderer.render(scene, topCam || camera); updTags(); if (HOOK.ui) HOOK.ui(1 / 60); },
   sim(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); }, // sin render (pruebas rápidas)
   setInput(i) { INPUT = i; }, music() { if (!AN) return null; const d = new Float32Array(2048); AN.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { song: song && song.n, bpm: BPM, step: stepN, pk, t: AC.currentTime, st: AC.state }; }, startMusic(i, bar) { startAudio(); if (i != null) { songI = i - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.05; } if (bar) { pickSong(songI + 1, nextStep); stepN = bar * 8; } }, arm() { return armLen; }, camClear, tp(x, z, yaw) { P.pos.set(x, groundAt(x, z), z); if (yaw != null) { P.yaw = yaw; cam.yaw = yaw + Math.PI; } cam.target.copy(P.pos).add(V3(0, 1.25, 0)); collide(P.pos); ant.position.copy(P.pos); ant.rotation.y = P.yaw; },
   view(px, py, pz, tx, ty, tz, fov) { camMode = 'fixed'; topCam = null; W.CEIL.visible = true; W.BLD.visible = true; W.ROOF.visible = true; camera.position.set(px, py, pz); camera.near = 0.1; camera.fov = fov || camera.fov; camera.updateProjectionMatrix(); camera.lookAt(tx, ty, tz); },
