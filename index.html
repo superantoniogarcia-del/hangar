@@ -818,7 +818,8 @@ const TS = new Map([[M.brick, 1], [M.tiles, 2.4], [M.concrete, 1.6], [M.corr, 0.
 function addG(g, mat, x = 0, y = 0, z = 0, ry = 0, rx = 0) { // g en coordenadas locales → mundo
   tmpM.makeRotationFromEuler(new THREE.Euler(rx, ry, 0)); tmpM.setPosition(x, y, z); g.applyMatrix4(tmpM); if (TS.has(mat) && g.attributes.uv) worldUV(g, TS.get(mat));
   if (!STATIC.has(mat)) STATIC.set(mat, []); STATIC.get(mat).push(g); return g; }
-const B = (x0, y0, z0, x1, y1, z1, mat) => addG(new THREE.BoxGeometry(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0)), mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+const CAMB = []; function camBox(x0, y0, z0, x1, y1, z1) { const a = [Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1)]; const h = a[4] - a[1], fx = a[3] - a[0], fz = a[5] - a[2]; if ((h >= 1.4 && Math.max(fx, fz) >= 0.25) || (a[1] >= 2.0 && Math.max(fx, fz) >= 0.5 && h >= 0.04)) CAMB.push(a); } // cajas para el brazo de cámara (sólo piezas grandes: paredes, columnas, forjados, dinteles)
+const B = (x0, y0, z0, x1, y1, z1, mat) => (camBox(x0, y0, z0, x1, y1, z1), addG(new THREE.BoxGeometry(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0)), mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2));
 const BC = (x0, y0, z0, x1, y1, z1, mat) => { col(x0, z0, x1, z1); return B(x0, y0, z0, x1, y1, z1, mat); };
 const CYL = (r, h, mat, x, y, z, seg = 12, r2) => addG(new THREE.CylinderGeometry(r2 != null ? r2 : r, r, h, seg), mat, x, y + h / 2, z);
 const PL = (w, h, mat, x, y, z, ry = 0, rx = 0) => addG(new THREE.PlaneGeometry(w, h), mat, x, y, z, ry, rx);
@@ -831,24 +832,25 @@ function mergeUV(list) { let nv = 0, ni = 0; for (const g of list) { nv += g.att
 const dyn = (mesh, parent = scene) => { parent.add(mesh); return mesh; };
 // ---------- PLANO (px del plano 1 → m: X=(px-249)/32-11.44, Z=(py-360)/32) ----------
 const XL = -11.44, XR = 11.44, ZB = -10.56, H = 4.8, T = 0.22;
-const P = { banoChicos: [-11.44, -10.56, -7.6, -8.22], pasillo: [-11.44, -8.22, -6.56, -7.22], banoChicas: [-11.44, -7.22, -8.06, -4.53], guardarropa: [-8.06, -7.22, -6.56, -4.53],
+const ZN = -8.40, ZS = -6.62, ZE = -3.6; // pasillo de baños ensanchado (~1.66 m libres) y baños más grandes
+const P = { banoChicos: [-11.44, -10.56, -7.6, ZN], pasillo: [-11.44, ZN, -6.56, ZS], banoChicas: [-11.44, ZS, -8.06, ZE], guardarropa: [-8.06, ZS, -6.56, ZE],
   notch: [-5.19, -10.56, -3.13, -9.25], botellas: [-1.7, -10.56, 6.81, -9.69], camareros: [-3.13, -9.69, 6.81, -8.28], barra: [-4.25, -8.28, 6.81, -7.34], columna: [-2.31, -6.69, -1.31, -5.69],
   dj: [-6.56, -5.19, -3.97, -1.88], escenario: [7.81, -7.34, 11.44, 0], backstage: [6.81, -10.56, 11.44, -7.34], tabique: [-0.25, -1.72, 3.4, -1.25], puerta: [0.53, 2.97], crisIzq: [-6.0, -0.66], crisDer: [3.84, 10.06] };
-const INT = [{ x0: -6.56, z0: -10.56, x1: 11.44, z1: 0 }, { x0: -11.44, z0: -10.56, x1: -6.56, z1: -4.53 }]; // zonas interiores (para cámara/música)
+const INT = [{ x0: -6.56, z0: -10.56, x1: 11.44, z1: 0 }, { x0: -11.44, z0: -10.56, x1: -6.56, z1: ZE }]; // zonas interiores (para cámara/música)
 // --- suelos
-B(-6.56, -0.05, -10.56, 11.44, 0, 0, M.tiles); B(-7.6, -0.05, -8.22, -6.56, 0, -7.22, M.tiles); B(-11.44, -0.05, -10.56, -7.6, 0, -8.22, M.btiles); B(-11.44, -0.05, -7.22, -8.06, 0, -4.53, M.btiles); B(-11.44, -0.05, -8.22, -7.6, 0, -7.22, M.concrete); B(-8.06, -0.05, -7.22, -6.56, 0, -4.53, M.darkwood);
-B(-7.6, -0.05, -10.56, -6.56, 0, -8.22, M.tiles);
+B(-6.56, -0.05, -10.56, 11.44, 0, 0, M.tiles); B(-7.6, -0.05, ZN, -6.56, 0, ZS, M.tiles); B(-11.44, -0.05, -10.56, -7.6, 0, ZN, M.btiles); B(-11.44, -0.05, ZS, -8.06, 0, ZE, M.btiles); B(-11.44, -0.05, ZN, -7.6, 0, ZS, M.concrete); B(-8.06, -0.05, ZS, -6.56, 0, ZE, M.darkwood);
+B(-7.6, -0.05, -10.56, -6.56, 0, ZN, M.tiles);
 B(-3.13, 0, -9.69, 6.81, 0.06, -8.28, M.darkwood); // tarima de camareros
 // --- techo (solo se ve desde abajo)
 const CEIL = new THREE.Group(); scene.add(CEIL);
-for (const [x0, z0, x1, z1] of [[-11.44, -10.56, 11.44, 0], [-11.44, -10.56, -6.56, -4.53]]) { if (x0 === -11.44 && x1 === 11.44) { const g = new THREE.PlaneGeometry(x1 - -6.56, z1 - z0); const m = new THREE.Mesh(g, M.ceil); m.rotation.x = Math.PI / 2; m.position.set((x1 + -6.56) / 2, H, (z0 + z1) / 2); CEIL.add(m); } else { const m = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), M.ceil); m.rotation.x = Math.PI / 2; m.position.set((x0 + x1) / 2, H - 0.6, (z0 + z1) / 2); CEIL.add(m); } }
+for (const [x0, z0, x1, z1] of [[-11.44, -10.56, 11.44, 0], [-11.44, -10.56, -6.56, ZE]]) { if (x0 === -11.44 && x1 === 11.44) { const g = new THREE.PlaneGeometry(x1 - -6.56, z1 - z0); const m = new THREE.Mesh(g, M.ceil); m.rotation.x = Math.PI / 2; m.position.set((x1 + -6.56) / 2, H, (z0 + z1) / 2); CEIL.add(m); } else { const m = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), M.ceil); m.rotation.x = Math.PI / 2; m.position.set((x0 + x1) / 2, H - 0.6, (z0 + z1) / 2); CEIL.add(m); } }
 // --- muros perimetrales
 BC(XL - T, 0, ZB - T, XR + 1, H + 0.2, ZB, M.concrete); // fondo (por fuera)
 B(-6.56, 0, ZB, -5.19, H, ZB + 0.02, M.brick); // tramo de ladrillo visible al fondo
 BC(...[P.notch[0], 0, P.notch[1], P.notch[2], H, P.notch[3]], M.concrete); // muesca: no es del local → muro macizo
-BC(XL - T, 0, ZB, XL, H, -4.53, M.concrete); // izquierda baños
-BC(-6.56 - T, 0, -4.53, -6.56, H, 0, M.brick); // izquierda junto a la cabina DJ
-BC(XL, 0, -4.53 - T / 2, -6.56, H, -4.53 + T / 2, M.concrete); // exterior bajo baño chicas/guardarropa
+BC(XL - T, 0, ZB, XL, H, ZE, M.concrete); // izquierda baños
+BC(-6.56 - T, 0, ZE, -6.56, H, 0, M.brick); // izquierda junto a la cabina DJ
+BC(XL, 0, ZE - T / 2, -6.56, H, ZE + T / 2, M.concrete); // exterior bajo baño chicas/guardarropa
 BC(XR, 0, ZB, XR + 1, H + 0.2, 0.3, M.brick); // derecha (escenario)
 // --- fachada: machones, cristaleras con cuadrícula negra, puerta
 const FZ = 0.12; const pier = (x0, x1) => { BC(x0, 0, -0.02, x1, H, FZ + 0.12, M.black); };
@@ -864,19 +866,19 @@ crist(...P.crisIzq);
   const leaf = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, 2.6), M.glass); leaf.position.set((x1 - x0) / 2 * (s ? -1 : 1), 1.3, 0); g.add(leaf); const fr = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 0.06, 0.06), M.frame); fr.position.set(leaf.position.x, 2.6, 0); g.add(fr); const fr2 = fr.clone(); fr2.position.y = 0.03; g.add(fr2);
   g.position.set(s ? b : a, 0, FZ - 0.05); g.rotation.y = s ? 1.25 : -1.25; scene.add(g); } B(a, 2.6, FZ - 0.05, b, 3.0, FZ + 0.05, M.frame); }
 // --- baños: tabiques con huecos de puerta (sin puertas)
-const BT = 0.12, DOOR = [-10.0, -8.85];
-BC(-7.6 - BT / 2, 0, ZB, -7.6 + BT / 2, H, -8.22, M.brick); // derecha baño chicos
-BC(XL, 0, -8.22 - BT / 2, DOOR[0], H, -8.22 + BT / 2, M.concrete); BC(DOOR[1], 0, -8.22 - BT / 2, -7.6, H, -8.22 + BT / 2, M.concrete); B(DOOR[0], 2.2, -8.22 - BT / 2, DOOR[1], H, -8.22 + BT / 2, M.concrete);
-BC(XL, 0, -7.22 - BT / 2, DOOR[0], H, -7.22 + BT / 2, M.concrete); BC(DOOR[1], 0, -7.22 - BT / 2, -6.56, H, -7.22 + BT / 2, M.brick); B(DOOR[0], 2.2, -7.22 - BT / 2, DOOR[1], H, -7.22 + BT / 2, M.concrete);
-BC(-8.06 - BT / 2, 0, -7.22, -8.06 + BT / 2, H, -4.53, M.concrete); // entre baño chicas y guardarropa
+const BT = 0.12, DOOR = [-10.3, -9.0];
+BC(-7.6 - BT / 2, 0, ZB, -7.6 + BT / 2, H, ZN, M.brick); // derecha baño chicos
+BC(XL, 0, ZN - BT / 2, DOOR[0], H, ZN + BT / 2, M.concrete); BC(DOOR[1], 0, ZN - BT / 2, -7.6, H, ZN + BT / 2, M.concrete); B(DOOR[0], 2.2, ZN - BT / 2, DOOR[1], H, ZN + BT / 2, M.concrete);
+BC(XL, 0, ZS - BT / 2, DOOR[0], H, ZS + BT / 2, M.concrete); BC(DOOR[1], 0, ZS - BT / 2, -6.56, H, ZS + BT / 2, M.brick); B(DOOR[0], 2.2, ZS - BT / 2, DOOR[1], H, ZS + BT / 2, M.concrete);
+BC(-8.06 - BT / 2, 0, ZS, -8.06 + BT / 2, H, ZE, M.concrete); // entre baño chicas y guardarropa
 // guardarropa: frente a la sala con mostrador y ventanilla
-BC(-6.56 - BT / 2, 0, -7.22, -6.56 + BT / 2, 1.05, -4.53, M.black); B(-6.56 - BT / 2, 2.1, -7.22, -6.56 + BT / 2, H, -4.53, M.brick); B(-6.56 - 0.25, 1.05, -6.9, -6.56 + 0.25, 1.1, -4.85, M.wood);
-for (const z of [-7.22, -4.53]) B(-6.56 - BT / 2, 1.05, z - 0.15, -6.56 + BT / 2, 2.1, z + 0.15, M.brick);
-for (let i = 0; i < 12; i++) { const z = -7.0 + i * 0.2; CYL(0.012, 0.3, M.metal, -7.3, 1.55, z, 6); } B(-7.9, 1.85, -7.1, -7.0, 1.88, -4.7, M.metal); // perchas
+BC(-6.56 - BT / 2, 0, ZS, -6.56 + BT / 2, 1.05, -5.3, M.black); B(-6.56 - BT / 2, 2.1, ZS, -6.56 + BT / 2, H, -5.3, M.brick); BC(-6.56 - BT / 2, 0, -5.3, -6.56 + BT / 2, H, ZE, M.brick); B(-6.56 - 0.25, 1.05, ZS + 0.25, -6.56 + 0.25, 1.1, -5.45, M.wood);
+for (const z of [ZS, -5.3]) B(-6.56 - BT / 2, 1.05, z - 0.15, -6.56 + BT / 2, 2.1, z + 0.15, M.brick);
+for (let i = 0; i < 12; i++) { const z = -6.4 + i * 0.22; CYL(0.012, 0.3, M.metal, -7.3, 1.55, z, 6); } B(-7.9, 1.85, -6.5, -7.0, 1.88, -3.8, M.metal); // perchas
 // sanitarios (decoración)
 const wc = (x, z, ry) => { const g = new THREE.Group(); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.4, 14), M.white); b.position.y = 0.2; g.add(b); const t = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.16), M.white); t.position.set(0, 0.55, -0.22); g.add(t); g.position.set(x, 0, z); g.rotation.y = ry; scene.add(g); col(x - 0.3, z - 0.35, x + 0.3, z + 0.3); };
-wc(-11.0, -10.0, Math.PI / 2); wc(-11.0, -5.2, Math.PI / 2); for (const [z0] of [[-9.0]]) BC(-8.4, 0.75, -10.5, -7.7, 0.85, -9.3, M.white); BC(-8.4, 0.75, -6.2, -7.7 + 0.35, 0.85, -4.65, M.white);
-PL(1.0, 0.7, std({ color: '#9fb0c0', metalness: 0.9, roughness: 0.1 }), -7.68, 1.45, -9.9, -Math.PI / 2); PL(1.0, 0.7, std({ color: '#9fb0c0', metalness: 0.9, roughness: 0.1 }), -8.12, 1.45, -5.4, -Math.PI / 2);
+wc(-11.0, -10.0, Math.PI / 2); wc(-11.0, -4.2, Math.PI / 2); for (const [z0] of [[-9.0]]) BC(-8.4, 0.75, -10.5, -7.7, 0.85, -9.3, M.white); BC(-8.6, 0.75, -5.4, -8.12, 0.85, -4.0, M.white);
+PL(1.0, 0.7, std({ color: '#9fb0c0', metalness: 0.9, roughness: 0.1 }), -7.68, 1.45, -9.9, -Math.PI / 2); PL(1.0, 0.7, std({ color: '#9fb0c0', metalness: 0.9, roughness: 0.1 }), -8.13, 1.45, -4.7, -Math.PI / 2);
 // --- cabina DJ elevada
 const DJ = { x: -5.55, z: -3.55, y: 0.62 };
 { const [x0, z0, x1, z1] = P.dj; col(x0, z0, x1, z1); B(x0, 0, z0, x1, 0.6, z1, M.black); B(x0, 0.6, z0, x1, 0.62, z1, M.darkwood);
@@ -1081,7 +1083,7 @@ const LAMPS = []; for (const [x, z] of [[-12, 8.7], [2.4, 8.7], [-26, 8.7], [14.
 { const c = cv(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, 'rgba(255,214,160,0.55)'); g.addColorStop(1, 'rgba(255,214,160,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h); }); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const mat = new THREE.MeshBasicMaterial({ map: t, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
   for (const L of LAMPS) { const m = new THREE.Mesh(new THREE.PlaneGeometry(11, 11), mat); m.rotation.x = -Math.PI / 2; m.position.set(L.x, 0.02, L.z); scene.add(m); } }
 // límites: no se pisa la avenida ni la calle lateral (bordillo), ni detrás del edificio
-col(-80, CURB, 80, CURB + 40); col(15.2, -60, 40, CURB + 1); col(-80, -60, 12.4, -10.81); col(-80, -60, -60, 20); col(12.4, -60, 15.2, -24); col(-6.56, -10.81, XL, -4.53 - 0.11);
+col(-80, CURB, 80, CURB + 40); col(15.2, -60, 40, CURB + 1); col(-80, -60, 12.4, -10.81); col(-80, -60, -60, 20); col(12.4, -60, 15.2, -24); /* (antes un colisor tapaba toda la zona de baños) */
 // ---------- tráfico: coches, motos y autobuses (un sentido, de izq. a dcha.) ----------
 const CARS = []; const carCols = ['#b8bcc4', '#1e2a44', '#7a1e1e', '#e8e8e8', '#2a2a2e', '#3a5a3a', '#c0a060'];
 const LANES = [10.8, 14.4, 18.0, 21.6];
@@ -1104,7 +1106,7 @@ const PL_ = (c, i, d, x, y, z) => { const l = new THREE.PointLight(c, i, d, 1.6)
 const LIGHTS = { bar: PL_('#ffb860', 9, 9, 1.2, 2.3, -7.3), bar2: LITE ? null : PL_('#ffb860', 7, 8, 5.2, 2.3, -7.3), room1: PL_('#B03CFF', 15, 14, -1.5, 4.0, -3.0), room2: PL_('#FF2BD0', LITE ? 0 : 11, 12, 4.5, 4.0, -2.5),
   stage: PL_('#ff2a1a', 16, 10, 9.6, 3.8, -3.7), dj: PL_('#2A3CFF', 8, 6, -4.6, 2.6, -3.5), baths: PL_('#e8f0ff', 7, 9, -9.4, 3.6, -7.7), street: PL_('#ffd6a0', 16, 22, 2.4, 7.0, 8.0), street2: LITE ? null : PL_('#ffd6a0', 14, 22, -12, 7.0, 8.0), portico: PL_('#fff0d8', 11, 14, 1.5, 5.3, 2.0) };
 if (!LITE) { LIGHTS.stage.castShadow = false; }
-window.HW = { scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
+window.HW = { scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, CAMB, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
 })();
 </script>
 <script type="module">document.getElementById('logo').src = window.HANGAR_IMG.logo; // ===== HANGAR · juego (exploración libre) =====
@@ -1174,34 +1176,58 @@ function stepPlayer(dt) { const I = readInput(); const f = V3(-Math.sin(cam.yaw)
   if (mag > 0.05) { const ty = Math.atan2(want.x, want.z); const d = angDiff(P.yaw, ty); P.turn = d / dt; P.yaw += d * Math.min(1, dt * 10); } else P.turn = 0;
   const tv = mag > 0.05 ? want.normalize().multiplyScalar(spd) : V3(); P.vel.lerp(tv, Math.min(1, dt * 10)); P.pos.addScaledVector(P.vel, dt); collide(P.pos);
   ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: Math.hypot(P.vel.x, P.vel.z) / 2.4, grounded: true, turn: clamp(P.turn || 0, -6, 6) * 0.1 }); }
-// ---------- cámara (seguimiento + corte por plano cercano en interiores) ----------
+// ---------- cámara (seguimiento + brazo con colisión; sin ocultar geometría) ----------
 const cam = { yaw: 0, pitch: 0.32, target: V3() }; let camDist = TOUCH && innerHeight > innerWidth ? 6.4 : 5.6, camMode = 'follow', camFix = null;
 cam.yaw = P.yaw + Math.PI; cam.target.copy(P.pos).add(V3(0, 1.2, 0));
 function updCam(dt) { if (camMode !== 'follow') return; const tgt = P.pos.clone().add(V3(0, 1.25, 0)); cam.target.lerp(tgt, Math.min(1, dt * 8));
   const spd = Math.hypot(P.vel.x, P.vel.z); if (spd > 0.4 && T - lastManual > 1.6) cam.yaw += angDiff(cam.yaw, P.yaw + Math.PI) * Math.min(1, dt * 0.9 * spd / 2.4);
   const ins = inside(P.pos); const dist = camDist * (ins ? 1 : 1.15); const dir = V3(Math.sin(cam.yaw) * Math.cos(cam.pitch), Math.sin(cam.pitch), Math.cos(cam.yaw) * Math.cos(cam.pitch));
-  camera.position.copy(cam.target).addScaledVector(dir, dist); if (ins) camera.position.y = Math.min(camera.position.y, W.H + 2.5);
-  const near = Math.max(0.1, dist - (ins ? 2.0 : 2.6)); if (Math.abs(camera.near - near) > 0.01) { camera.near = near; camera.updateProjectionMatrix(); } camera.lookAt(cam.target); }
+  // brazo de cámara: nada se oculta ni se vuelve transparente; si hay una pared/techo entre el jugador y la cámara, la cámara se acerca
+  let hit = armCast(cam.target, dir, dist); if (hit < dist * 0.8) { const k = clamp(1 - hit / dist, 0, 1), pt = Math.min(1.0, cam.pitch + 0.6 * k); const d2 = V3(Math.sin(cam.yaw) * Math.cos(pt), Math.sin(pt), Math.cos(cam.yaw) * Math.cos(pt)); const h2 = armCast(cam.target, d2, dist); if (h2 >= hit * 0.9) { dir.copy(d2); hit = h2; } } /* en sitios estrechos la cámara sube para mirar por encima de la cabeza */ const want = Math.max(0.15, Math.min(dist, hit - 0.22)); armLen = want < armLen ? want : armLen + (want - armLen) * Math.min(1, dt * 3);
+  camera.position.copy(cam.target).addScaledVector(dir, armLen); if (camera.near !== 0.1) { camera.near = 0.1; camera.updateProjectionMatrix(); } camera.lookAt(cam.target); }
+let armLen = 5; const ARMB = W.CAMB.concat([[-11.6, W.H - 0.02, -10.7, 11.6, W.H + 3, 0.1], [-60, W.PORT_H - 0.05, -1, 12.8, W.PORT_H + 60, 4.4], [-11.6, W.H - 0.62, -10.7, -6.56, W.H, W.P.banoChicas[3]]]);
+function armCast(o, d, max) { let best = max; for (const b of ARMB) { let t0 = 0, t1 = best; let ok = true;
+    for (let k = 0; k < 3; k++) { const oo = k === 0 ? o.x : k === 1 ? o.y : o.z, dd = k === 0 ? d.x : k === 1 ? d.y : d.z, mn = b[k] - 0.12, mx = b[k + 3] + 0.12;
+      if (Math.abs(dd) < 1e-6) { if (oo < mn || oo > mx) { ok = false; break; } } else { let ta = (mn - oo) / dd, tb = (mx - oo) / dd; if (ta > tb) { const q = ta; ta = tb; tb = q; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) { ok = false; break; } } }
+    if (ok && t0 > 0.05 && t0 < best) best = t0; } return best; }
 function fitView() { camera.aspect = innerWidth / innerHeight; camera.fov = camera.aspect < 1 ? Math.min(78, 55 / Math.max(0.5, camera.aspect) ** 0.5) : 55; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); }
 addEventListener('resize', fitView); fitView();
-// ---------- música (WebAudio sintetizada; adaptada del DJ de La Curva) ----------
-let AC = null, master = null, lp = null; const BPM = 122, BEAT = 60 / BPM; let nextBeat = 0, beatN = 0; let MUTE = Q.has('mute');
-function startAudio() { if (AC || MUTE) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 18000; master = AC.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(AC.destination); nextBeat = AC.currentTime + 0.1; $('hint').classList.add('off'); } catch (_) {} }
-function tone(f, d, type, v, slide, t) { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f * slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + 0.02); }
-let NB = null; function noise(d, v, t, hp) { if (!NB) { NB = AC.createBuffer(1, AC.sampleRate * 0.3 | 0, AC.sampleRate); const ch = NB.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1); }
-  const s = AC.createBufferSource(); s.buffer = NB; const f = AC.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp || 6000; const g = AC.createGain(); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + d); s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + d + 0.02); }
-const BASS = [55, 55, 65.4, 73.4, 55, 55, 82.4, 73.4], CH = [[261.6, 329.6, 392], [293.7, 349.2, 440], [246.9, 311.1, 370], [220, 277.2, 329.6]];
-function beatSound(b, t) { tone(120, 0.18, 'sine', 0.55, 0.3, t); noise(0.05, 0.1, t + BEAT / 2); if (b % 2) noise(0.14, 0.09, t, 1800); tone(BASS[b % 8], BEAT * 0.45, 'sawtooth', 0.09, 0, t + BEAT / 2);
-  if (b % 4 === 0) for (const f of CH[(b >> 4) & 3]) tone(f, 0.22, 'square', 0.03, 0, t); if (b % 8 === 6) tone(659.3 * ((b >> 3) % 2 ? 1 : 0.89), 0.3, 'triangle', 0.05, 0, t + BEAT * 0.5); }
-function updAudio() { if (!AC) return; while (nextBeat < AC.currentTime + 0.25) { beatSound(beatN++, nextBeat); nextBeat += BEAT; }
-  const d = P.pos.distanceTo(V3(W.DJ.x, 0, W.DJ.z)), ins = inside(P.pos); const vol = (ins ? 0.5 : 0.28) * clamp(1.4 - d / 30, 0.15, 1); master.gain.setTargetAtTime(vol, AC.currentTime, 0.2); lp.frequency.setTargetAtTime(ins ? 16000 : 900, AC.currentTime, 0.3); }
-const beatPhase = () => AC ? ((AC.currentTime - (nextBeat - BEAT)) / BEAT) : (T / BEAT) % 1;
+// ---------- música indie-rock (WebAudio procedural, original) ----------
+let AC = null, master = null, lp = null, gtr = null; const BPM = 124, BEAT = 60 / BPM, ST8 = BEAT / 2; let nextStep = 0, stepN = 0, beatN = 0, T0 = 0; let MUTE = Q.has('mute');
+// música INDIE-ROCK procedural (original): batería en directo, bajo a corcheas, guitarra rítmica rasgueada con saturación, arpegio jangle limpio
+function startAudio() { if (AC || MUTE) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 18000; master = AC.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(AC.destination);
+  const ws = AC.createWaveShaper(), cu = new Float32Array(512); for (let i = 0; i < 512; i++) { const x = i / 255.5 - 1; cu[i] = Math.tanh(x * 3.2); } ws.curve = cu; const gl = AC.createBiquadFilter(); gl.type = 'lowpass'; gl.frequency.value = 3200; gtr = AC.createGain(); gtr.gain.value = 0.5; gtr.connect(ws); ws.connect(gl); gl.connect(master);
+  nextStep = T0 = AC.currentTime + 0.1; $('hint').classList.add('off'); } catch (_) {} }
+function tone(f, d, type, v, slide, t, dest) { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f * slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + d); o.connect(g); g.connect(dest || master); o.start(t); o.stop(t + d + 0.02); }
+let NB = null; function noise(d, v, t, hp, type) { if (!NB) { NB = AC.createBuffer(1, AC.sampleRate * 0.5 | 0, AC.sampleRate); const ch = NB.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1); }
+  const s = AC.createBufferSource(); s.buffer = NB; const f = AC.createBiquadFilter(); f.type = type || 'highpass'; f.frequency.value = hp || 6000; const g = AC.createGain(); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + d); s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + d + 0.02); }
+// cuerda pulsada: diente de sierra con filtro que se cierra (guitarra sintética)
+function pluck(f, d, v, t, bright, dest) { const o = AC.createOscillator(), fl = AC.createBiquadFilter(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(f, t); o.detune.setValueAtTime(Math.random() * 8 - 4, t); fl.type = 'lowpass'; fl.Q.value = 2; fl.frequency.setValueAtTime(bright, t); fl.frequency.exponentialRampToValueAtTime(Math.max(200, bright * 0.18), t + d * 0.7);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.001, t + d); o.connect(fl); fl.connect(g); g.connect(dest || master); o.start(t); o.stop(t + d + 0.03); }
+// progresión E – C#m – A – B (bajo + voces de acorde)
+const PROG = [{ b: 82.41, c: [164.8, 246.9, 329.6, 415.3] }, { b: 69.3, c: [138.6, 207.7, 277.2, 329.6] }, { b: 55, c: [110, 164.8, 220, 277.2] }, { b: 61.74, c: [123.5, 185, 246.9, 311.1] }];
+const ARP = [0, 2, 1, 3, 2, 1, 3, 2], STRUM = [1, 0, 0.6, 0.7, 0, 0.7, 0.6, 0.8]; // acentos del rasgueo por corchea
+function stepSound(s, t) { const bar = s >> 3, e = s & 7, sec = bar % 16, ch = PROG[bar & 3], full = sec >= 4, chorus = sec >= 12, ROCK = LITE ? 0.8 : 1;
+  // batería: bombo en 1 y 3 (+ "y" del 3), caja en 2 y 4, charles a corcheas, crash al empezar sección
+  if (e === 0 || e === 4 || (full && e === 5 && bar % 2)) tone(110, 0.16, 'sine', 0.6, 0.35, t);
+  if (e === 2 || e === 6) { noise(0.16, 0.22, t, 1700, 'bandpass'); tone(190, 0.08, 'triangle', 0.18, 0.6, t); }
+  noise(e % 2 ? 0.03 : 0.05, e % 2 ? 0.05 : 0.08, t, 7000); if ((sec === 4 || sec === 12) && e === 0) noise(1.1, 0.12, t, 4500);
+  if (sec === 15 && e >= 4) tone(160 - e * 12, 0.12, 'sine', 0.35, 0.5, t); // redoble de toms
+  // bajo a corcheas (con quinta de paso)
+  if (full || e % 2 === 0) tone(e === 7 ? ch.b * 1.5 : ch.b, ST8 * 0.9, 'sawtooth', 0.07, 0, t);
+  // guitarra rítmica saturada (rasgueo con pequeño desfase entre cuerdas)
+  if (full && STRUM[e] > 0) { const v = 0.05 * STRUM[e] * (chorus ? 1.2 : 0.9); ch.c.forEach((f, k) => pluck(f, chorus ? 0.32 : 0.22, v, t + k * 0.008 * (e % 2 ? -1 : 1) + (e % 2 ? 0.024 : 0), 2600, gtr)); }
+  // arpegio jangle limpio (octava arriba), siempre en intro y en estrofas; en estribillo, melodía
+  if (!chorus || !LITE) { const f = ch.c[ARP[e]] * 2; if (!chorus) pluck(f, 0.4, 0.035 * ROCK, t, 4200); else if (e % 2 === 0) pluck(ch.c[(e >> 1) % 4] * 2 * (e === 6 ? 1.122 : 1), 0.5, 0.04, t, 3600); } }
+function updAudio() { if (!AC) return; while (nextStep < AC.currentTime + 0.25) { stepSound(stepN, nextStep); stepN++; beatN = stepN >> 1; nextStep += ST8; }
+  const d = P.pos.distanceTo(V3(W.DJ.x, 0, W.DJ.z)), ins = inside(P.pos); const vol = (ins ? 0.55 : 0.3) * clamp(1.4 - d / 30, 0.15, 1); master.gain.setTargetAtTime(vol, AC.currentTime, 0.2); lp.frequency.setTargetAtTime(ins ? 16000 : 900, AC.currentTime, 0.3); }
+const beatPhase = () => AC ? ((((AC.currentTime - T0) / BEAT) % 1) + 1) % 1 : (T / BEAT) % 1;
 // ---------- luces animadas ----------
 const LC = W.LED_C.getContext('2d'); let ledT = 0;
 function drawLED(t) { const w = 256, h = 128; LC.fillStyle = '#05050a'; LC.fillRect(0, 0, w, h); const hue = (t * 40) % 360; for (let i = 0; i < 16; i++) { const v = 0.5 + 0.5 * Math.sin(t * 3 + i * 0.7); LC.fillStyle = `hsl(${(hue + i * 12) % 360},90%,${20 + 40 * v}%)`; LC.fillRect(i * 16, h * (1 - v * 0.9), 14, h * v * 0.9); }
   LC.fillStyle = '#ffffff'; LC.font = 'bold 34px Arial Black, sans-serif'; LC.textAlign = 'center'; LC.globalAlpha = 0.85; LC.fillText('HANGAR', w / 2, 50 + Math.sin(t * 2) * 6); LC.globalAlpha = 1; for (let y = 0; y < h; y += 3) { LC.fillStyle = 'rgba(0,0,0,.25)'; LC.fillRect(0, y, w, 1); } W.LED_T.needsUpdate = true; }
 const COLS = ['#B03CFF', '#FF2BD0', '#2A3CFF', '#00D5FF'].map(c => new THREE.Color(c));
-function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = Math.floor((AC ? beatN : T / BEAT) / 4);
+function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = Math.floor((AC ? Math.max(0, (AC.currentTime - T0) / BEAT) : T / BEAT) / 4);
   W.BALL.rotation.y += dt * 0.8; const L = W.LIGHTS; L.room1.color.copy(COLS[bar & 3]); if (L.room2.intensity) L.room2.color.copy(COLS[(bar + 2) & 3]); L.room1.intensity = 9 + 6 * kick;
   L.dj.color.copy(COLS[(bar + 1) & 3]); L.dj.intensity = 5 + 5 * kick; L.stage.color.setHSL(((bar >> 2) & 1) ? 0.64 : 0.01, 1, 0.5); L.stage.intensity = 10 + 6 * kick;
   for (const [i, p] of W.PARS.entries()) p.material.color.copy(L.stage.color).multiplyScalar(0.8 + 1.4 * (((i + bar) % 3 === 0) ? kick : 0.4));
@@ -1222,7 +1248,7 @@ loop();
 // ---------- API de pruebas ----------
 window.GAME = { P, cam, W, ant, alv, camera, renderer,
   step(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); renderer.render(scene, topCam || camera); updTags(); },
-  setInput(i) { INPUT = i; }, tp(x, z, yaw) { P.pos.set(x, 0, z); if (yaw != null) { P.yaw = yaw; cam.yaw = yaw + Math.PI; } cam.target.copy(P.pos).add(V3(0, 1.25, 0)); collide(P.pos); ant.position.copy(P.pos); ant.rotation.y = P.yaw; },
+  setInput(i) { INPUT = i; }, arm() { return armLen; }, tp(x, z, yaw) { P.pos.set(x, 0, z); if (yaw != null) { P.yaw = yaw; cam.yaw = yaw + Math.PI; } cam.target.copy(P.pos).add(V3(0, 1.25, 0)); collide(P.pos); ant.position.copy(P.pos); ant.rotation.y = P.yaw; },
   view(px, py, pz, tx, ty, tz, fov) { camMode = 'fixed'; topCam = null; W.CEIL.visible = true; W.BLD.visible = true; W.ROOF.visible = true; camera.position.set(px, py, pz); camera.near = 0.1; camera.fov = fov || camera.fov; camera.updateProjectionMatrix(); camera.lookAt(tx, ty, tz); },
   follow() { camMode = 'follow'; topCam = null; W.CEIL.visible = true; W.BLD.visible = true; W.ROOF.visible = true; fitView(); },
   top() { W.CEIL.visible = false; W.BLD.visible = false; W.ROOF.visible = false; for (const t of TAGS) t.el.remove(); TAGS.length = 0; const a = innerWidth / innerHeight, hw = a > 1 ? 18 : 13, hh = hw / a; topCam = new THREE.OrthographicCamera(-hw, hw, hh, -hh, 1, 200); topCam.position.set(1.5, 80, a > 1 ? -1 : 0); topCam.up.set(0, 0, -1); topCam.lookAt(1.5, 0, a > 1 ? -1 : 0); camMode = 'fixed'; },
