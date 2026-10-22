@@ -856,7 +856,10 @@ pier(-6.56, P.crisIzq[0]); pier(P.crisIzq[1], P.puerta[0]); pier(P.puerta[1], P.
 B(-6.56, 3.0, -0.02, XR + 1, H + 0.6, FZ + 0.12, M.black); // faldón sobre la carpintería (interior/exterior)
 function crist(x0, x1) { col(x0, -0.02, x1, FZ + 0.1); PL(x1 - x0, 3.0, M.glass, (x0 + x1) / 2, 1.5, FZ); const n = Math.round((x1 - x0) / 1.1);
   for (let i = 0; i <= n; i++) B(x0 + (x1 - x0) * i / n - 0.03, 0, FZ - 0.04, x0 + (x1 - x0) * i / n + 0.03, 3.0, FZ + 0.04, M.frame); for (const y of [0.05, 1.0, 2.1, 2.97]) B(x0, y - 0.03, FZ - 0.04, x1, y + 0.03, FZ + 0.04, M.frame); }
-crist(...P.crisIzq); crist(...P.crisDer);
+crist(...P.crisIzq);
+{ const [x0, x1] = P.crisDer; col(x0, -0.02, x1, FZ + 0.1); const fM = std({ color: '#d9dcdc', emissive: '#a8b0b2', emissiveIntensity: 0.32, roughness: 0.9 }); B(x0, 0, FZ - 0.02, x1, 3.0, FZ + 0.02, fM); const fr = std({ color: '#3a3a3e', roughness: 0.45, metalness: 0.6 });
+  const xs = [0, 0.17, 0.34, 0.5, 0.68, 0.84, 1]; for (const f of xs) B(x0 + (x1 - x0) * f - 0.05, 0, FZ - 0.05, x0 + (x1 - x0) * f + 0.05, 3.0, FZ + 0.07, fr);
+  for (const y of [0.05, 0.85, 1.75, 2.35, 2.95]) B(x0, y - 0.05, FZ - 0.05, x1, y + 0.05, FZ + 0.07, fr); }
 { const [a, b] = P.puerta; for (const s of [0, 1]) { const x0 = s ? (a + b) / 2 + 0.02 : a, x1 = s ? b : (a + b) / 2 - 0.02; const g = new THREE.Group(); // hojas abiertas hacia dentro
   const leaf = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, 2.6), M.glass); leaf.position.set((x1 - x0) / 2 * (s ? -1 : 1), 1.3, 0); g.add(leaf); const fr = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 0.06, 0.06), M.frame); fr.position.set(leaf.position.x, 2.6, 0); g.add(fr); const fr2 = fr.clone(); fr2.position.y = 0.03; g.add(fr2);
   g.position.set(s ? b : a, 0, FZ - 0.05); g.rotation.y = s ? 1.25 : -1.25; scene.add(g); } B(a, 2.6, FZ - 0.05, b, 3.0, FZ + 0.05, M.frame); }
@@ -889,8 +892,10 @@ BC(...[P.columna[0], 0, P.columna[1], P.columna[2], H, P.columna[3]], M.black);
 function panelPillar(x, z, s = 0.6) { BC(x - s / 2, 0, z - s / 2, x + s / 2, H, z + s / 2, M.frame); for (const [nx, nz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) for (let j = 0; j < 4; j++) for (let k = 0; k < 2; k++) { const w = s / 2 - 0.05, hh = H / 4 - 0.07; const px = x + nx * (s / 2 + 0.005) + (nz ? (k - 0.5) * (s / 2) : 0), pz = z + nz * (s / 2 + 0.005) + (nx ? (k - 0.5) * (s / 2) : 0); PL(w, hh, M.panel, px, j * H / 4 + H / 8, pz, nx ? nx * Math.PI / 2 : (nz < 0 ? Math.PI : 0)); } }
 // (el plano solo tiene una columna: no se añaden pilares inventados)
 // --- barra (~11 m): frente de tablas lila/azul, encimera de madera clara
-{ const [x0, z0, x1, z1] = P.barra; col(x0, z0, x1, z1); B(x0, 0, z0 + 0.1, x1, 1.0, z1, M.boards); B(x0 - 0.05, 1.0, z0, x1, 1.06, z1 + 0.08, M.wood); B(x0, 0, z1 - 0.02, x1, 0.12, z1 + 0.02, M.black);
-  B(x0, 0, z0, x0 + 0.5, 1.0, z0 + 0.1, M.boards); }
+{ const [x0, z0, x1, z1] = P.barra, xa = x0 + 2.0; col(x0, z0, x1, z1); B(xa, 0, z0 + 0.1, x1, 1.0, z1, M.boards); B(xa, 1.0, z0, x1, 1.06, z1 + 0.08, M.wood); B(xa, 0, z1 - 0.02, x1, 0.12, z1 + 0.02, M.black);
+  // tramo izquierdo rebajado accesible (~0.80 m) con hueco libre para las rodillas en el lado del cliente
+  B(x0, 0, z0 + 0.1, xa, 0.74, z1 - 0.48, M.boards); B(x0 - 0.05, 0.74, z0, xa, 0.8, z1 + 0.08, M.wood); B(x0, 0, z1 - 0.5, xa, 0.12, z1 - 0.46, M.black);
+  B(xa - 0.02, 0.8, z0, xa + 0.02, 1.0, z1 + 0.08, M.boards); B(x0, 0, z0, x0 + 0.5, 0.74, z0 + 0.1, M.boards); }
 // botellero: estantes oscuros con tira LED blanca por balda, chapa ondulada detrás
 const LEDS = []; const LEDM = emi('#ffffff', 1.1);
 { const [x0, z0, x1, z1] = P.botellas; col(x0, z0, x1, z1); B(x0, 0, ZB + 0.01, x1, H, ZB + 0.03, M.corr); B(x0, 0, z0, x1, 0.9, z1, M.black); B(x0, 0.9, z0, x1, 0.95, z1, M.concrete);
@@ -899,7 +904,7 @@ const LEDS = []; const LEDM = emi('#ffffff', 1.1);
     for (let x = x0 + 0.2; x < x1 - 0.2; x += 0.13 + srnd() * 0.05) { const h = 0.22 + srnd() * 0.12, c = bcols[(srnd() * bcols.length) | 0]; if (!M['b' + c]) M['b' + c] = std({ color: c, roughness: 0.15, metalness: 0.1, emissive: c, emissiveIntensity: 0.35 }); CYL(0.035, h, M['b' + c], x, y + 0.04, ZB + 0.18, 8); CYL(0.012, 0.07, M['b' + c], x, y + 0.04 + h, ZB + 0.18, 6, 0.03); } }
   for (let x = x0 + 0.3; x < x1 - 0.2; x += 0.6) B(x, 0.95, z0 + 0.12, x + 0.5, 1.05, z0 + 0.3, std({ color: '#cfd6dc', transparent: true, opacity: 0.6, roughness: 0.1 })); } // vasos
 // neveras con puerta de cristal bajo la barra (cara interior)
-for (let x = -2.6; x < 6.4; x += 1.8) B(x, 0.05, -8.28, x + 0.8, 0.85, -8.2, std({ color: '#223', emissive: '#6af', emissiveIntensity: 0.45, roughness: 0.1 }));
+for (let x = -2.0; x < 6.4; x += 1.8) B(x, 0.05, -8.28, x + 0.8, 0.85, -8.2, std({ color: '#223', emissive: '#6af', emissiveIntensity: 0.45, roughness: 0.1 }));
 // grifo de cerveza y TPV
 CYL(0.03, 0.35, M.metal, 1.0, 1.06, -7.7, 8); for (let i = 0; i < 3; i++) CYL(0.012, 0.18, std({ color: '#111' }), 0.9 + i * 0.1, 1.3, -7.66, 6);
 // lámparas de campana colgadas de un tubo sobre la barra
@@ -907,7 +912,7 @@ const WARM = []; { B(-4.0, 2.65, -7.83, 6.6, 2.69, -7.79, M.metal); for (let x =
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), emi('#ffb860', 1.6)); bulb.position.set(x, 2.02, -7.81); scene.add(bulb); WARM.push(bulb); } }
 // taburetes de cuero frente a la barra
 const stool = (x, z, h = 0.75) => { CYL(0.18, 0.08, M.leather, x, h, z, 14); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.78; addG(new THREE.CylinderGeometry(0.012, 0.012, h, 5), M.frame, x + Math.cos(a) * 0.12, h / 2, z + Math.sin(a) * 0.12); } col(x - 0.2, z - 0.2, x + 0.2, z + 0.2); };
-for (const x of [-2.9, -0.5, 4.8, 6.0]) stool(x, -6.95);
+// (sin taburetes en la barra: interior sin mobiliario, a petición de Antonio)
 // --- escenario elevado: tarima, reja frontal, pantalla LED, PAR rojos en barra negra, altavoz colgado
 const STG = { x0: 7.81, x1: 11.44, z0: -7.34, z1: 0, h: 0.6 };
 { col(STG.x0, STG.z0, STG.x1, STG.z1); B(STG.x0, 0, STG.z0, STG.x1, STG.h, STG.z1 - 0.12, M.black); B(STG.x0, STG.h, STG.z0, STG.x1, STG.h + 0.02, STG.z1 - 0.12, M.darkwood);
@@ -924,8 +929,8 @@ const PARS = []; { B(STG.x0 + 0.3, 3.15, -6.9, STG.x0 + 0.38, 3.22, -0.5, M.blac
 { const drum = std({ color: '#7a1a1a', roughness: 0.3, metalness: 0.2 }); CYL(0.28, 0.4, drum, 10.2, STG.h, -3.7, 18); for (const [dz, r] of [[-0.6, 0.18], [0.6, 0.2]]) CYL(r, 0.25, drum, 9.9, STG.h + 0.45, -3.7 + dz, 14); CYL(0.24, 0.02, M.yellow, 10.3, STG.h + 1.0, -2.8, 16); CYL(0.01, 1.0, M.metal, 10.3, STG.h, -2.8, 4);
   B(10.6, STG.h, -6.6, 11.3, STG.h + 1.1, -5.9, M.black); B(10.6, STG.h, -1.4, 11.3, STG.h + 1.1, -0.7, M.black); for (const z of [-5.2, -2.2]) { CYL(0.012, 1.45, M.metal, 8.6, STG.h, z, 4); addG(new THREE.SphereGeometry(0.04, 8, 6), M.black, 8.6, STG.h + 1.5, z); }
   for (const z of [-4.6, -2.8]) addG(new THREE.BoxGeometry(0.4, 0.28, 0.5), M.black, 8.2, STG.h + 0.14, z, 0, 0); }
-// backstage cerrado (al final de la barra, encima del escenario)
-{ const [x0, z0, x1, z1] = P.backstage; col(x0, z0, x1, z1); B(x0, 0, z1 - 0.1, x1, H, z1, M.concrete); B(x0, 0, z0, x0 + 0.1, H, z1, M.corr); B(x0 + 1.2, 0, z1 - 0.12, x0 + 2.1, 2.1, z1 - 0.1, std({ color: '#111' })); }
+// almacén (antes backstage): volumen macizo fuera del local, paredes a ras del final de la barra y del escenario
+{ const [x0, z0, x1, z1] = P.backstage; col(x0, z0, x1, z1); B(x0, 0, z0, x1, H, z1, M.concrete); B(x0, H, z0, x1, H + 0.03, z1, M.black); }
 // --- tabique (biombo) con portero, accesos de entrada/salida, mesita con vasos
 { const [x0, z0, x1, z1] = P.tabique; BC(x0, 0, z0, x1, 2.4, z1, M.concrete); B(x0, 2.4, z0, x1, 2.46, z1, M.black);
   BC(x0 - 0.05, 0, z1, x0 + 0.05, 2.0, -0.85, M.frame); BC(x1 - 0.05, 0, z1, x1 + 0.05, 2.0, -0.85, M.frame);
@@ -935,12 +940,12 @@ const SPOTS = { portero: { x: 1.75, z: -1.0 }, camarero1: { x: 0.5, z: -8.9 }, c
 const sign = (txt, x, z, ry, w = 0.9) => { const t = textTex(256, 64, (c, W, Hh) => { c.fillStyle = '#111'; c.fillRect(0, 0, W, Hh); c.fillStyle = '#f2f2f2'; c.font = 'bold 30px Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText(txt, W / 2, 44); }); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 4), new THREE.MeshBasicMaterial({ map: t })); m.position.set(x, 2.25, z); m.rotation.y = ry; scene.add(m); };
 sign('ENTRADA', -0.6, -1.05, Math.PI / 2, 0.8); sign('SALIDA', 3.75, -1.05, -Math.PI / 2, 0.8);
 // --- decoración: Chesterfield, mesa baja, mesas altas, escalera de caracol amarilla, carteles, '90', guirnaldas, bola de espejos
-{ const x = -5.0, z = -0.55; const g = new THREE.Group(); const seat = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.42, 0.7), M.leather); seat.position.y = 0.21; g.add(seat); const back = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.4, 0.2), M.leather); back.position.set(0, 0.6, 0.27); g.add(back);
-  for (const s of [-1, 1]) { const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.75, 12), M.leather); arm.rotation.x = Math.PI / 2; arm.position.set(s * 0.85, 0.5, 0); g.add(arm); }
-  for (let i = 0; i < 12; i++) { const bt = new THREE.Mesh(new THREE.SphereGeometry(0.018, 6, 4), std({ color: '#2a160c' })); bt.position.set(-0.75 + (i % 6) * 0.3, 0.55 + Math.floor(i / 6) * 0.15, 0.16); g.add(bt); }
-  g.position.set(x, 0, z); g.rotation.y = Math.PI; scene.add(g); col(x - 1.0, z - 0.4, x + 1.0, z + 0.4); BC(x - 0.5, 0.35, z - 1.15, x + 0.5, 0.4, z - 0.65, M.wood); for (const [a, b] of [[-0.45, -1.1], [0.45, -1.1], [-0.45, -0.7], [0.45, -0.7]]) B(x + a - 0.02, 0, z + b - 0.02, x + a + 0.02, 0.35, z + b + 0.02, M.frame); }
+// (sin Chesterfield ni mesa baja en el interior)
+
+
+
 const hiTable = (x, z, top = M.darkwood) => { BC(x - 0.4, 1.05, z - 0.4, x + 0.4, 1.1, z + 0.4, top); CYL(0.04, 1.05, M.frame, x, 0, z, 8); CYL(0.25, 0.03, M.frame, x, 0, z, 16); };
-hiTable(0.2, -4.2); hiTable(5.5, -2.2); for (const [x, z] of [[-0.5, -4.2], [0.9, -4.2], [5.5, -1.45], [5.5, -2.95]]) stool(x, z);
+// (sin mesas altas ni taburetes en el interior)
 // escalera de caracol amarilla (decorativa, junto a la muesca)
 { const x = -6.4, z = -9.6; CYL(0.06, H, M.yellow, x, 0, z, 10); for (let i = 0; i < 14; i++) { const a = i * 0.5, y = 0.2 + i * 0.24; const st = new THREE.BoxGeometry(0.75, 0.04, 0.28); st.translate(0.4, 0, 0); addG(st, M.yellow, x, y, z, a); const pole = new THREE.CylinderGeometry(0.012, 0.012, 0.9, 5); pole.translate(0.76, 0.45, 0); addG(pole, M.yellow, x, y, z, a); } col(x - 0.85, z - 0.85, x + 0.85, z + 0.85); }
 // carteles
@@ -988,10 +993,35 @@ for (let i = 0; i < 7; i++) B(-10 + i * 0.9 + 30, -0.119, CURB + 0.6, -9.5 + i *
 PL(73, PZ + 0.5, M.slats, -23.5, PORT_H, (PZ + 0.5) / 2, 0, Math.PI / 2); const DOWN = []; for (let x = -24; x < 12; x += 2.4) for (const z of [1.2, 2.6]) { const d = new THREE.Mesh(new THREE.CircleGeometry(0.09, 10), emi('#fff2d8', 1.5)); d.position.set(x, PORT_H - 0.01, z); d.rotation.x = Math.PI / 2; scene.add(d); DOWN.push(d); }
 for (let x = -58.2; x < 12; x += 6.88) { const px = x + 0.0; if (px > 11) break; BC(px - 0.4, 0, PZ - 0.4, px + 0.4, PORT_H, PZ + 0.4, M.stone); }
 BC(11.9, 0, PZ - 0.4, 12.7, PORT_H, PZ + 0.4, M.stone); // pilar de la esquina
-// fachada del local por fuera: faldón oscuro con letras blancas iluminadas HANGAR sobre la entrada
+// fachada del local por fuera: faldón oscuro (el rótulo va sobre la cristalera derecha)
 B(-6.56, H + 0.2, FZ + 0.12, XR + 1, PORT_H, FZ + 0.16, M.black);
-const SIGN = textTex(1024, 192, (x, w, h) => { x.clearRect(0, 0, w, h); x.fillStyle = '#ffffff'; x.font = 'bold 150px Arial Black, Arial, sans-serif'; x.textAlign = 'center'; x.shadowColor = '#ffffff'; x.shadowBlur = 18; x.fillText('HANGAR', w / 2, 158); });
-{ const m = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.79), new THREE.MeshBasicMaterial({ map: SIGN, transparent: true })); m.position.set(1.75, H + 0.62, FZ + 0.19); scene.add(m); }
+// rótulo HANGAR estilo cabaret sobre la cristalera derecha: banda de lamas oscuras + letras 3D con bombillas
+const MARQ = (() => { const [sx0, sx1] = P.crisDer, SZ = FZ + 0.2;
+  const slT = textTex(64, 256, (x, w, h) => { x.fillStyle = '#16161a'; x.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 16) { x.fillStyle = '#2a2a30'; x.fillRect(0, y, w, 9); x.fillStyle = '#0a0a0c'; x.fillRect(0, y + 13, w, 3); } }); slT.wrapS = slT.wrapT = THREE.RepeatWrapping; slT.repeat.set((sx1 - sx0) * 2, 1.6 / 1.6 * 3);
+  { const m = new THREE.Mesh(new THREE.PlaneGeometry(sx1 - sx0 + 0.3, 1.6), new THREE.MeshStandardMaterial({ map: slT, roughness: 0.55, metalness: 0.3 })); m.position.set((sx0 + sx1) / 2, 3.8, SZ - 0.02); scene.add(m); }
+  const arc = (cx, cy, rx, ry, a0, a1, n) => { const o = []; for (let i = 0; i <= n; i++) { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; o.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return o; };
+  const L = { H: [[[0, 0], [0, 1]], [[0.66, 0], [0.66, 1]], [[0, 0.5], [0.66, 0.5]]], A: [[[0, 0], [0.34, 1], [0.68, 0]], [[0.16, 0.38], [0.52, 0.38]]], N: [[[0, 0], [0, 1], [0.66, 0], [0.66, 1]]],
+    G: [arc(0.35, 0.5, 0.35, 0.5, 45, 360, 12), [[0.38, 0.46], [0.7, 0.46]]], R: [[[0, 0], [0, 1], [0.36, 1]].concat(arc(0.36, 0.75, 0.27, 0.25, 90, -90, 8)).concat([[0, 0.5]]), [[0.3, 0.5], [0.7, 0]]] };
+  const LH = 1.0, SW = 0.15, DEP = 0.12, gap = 0.26, word = 'HANGAR', wid = c => c === 'G' || c === 'R' ? 0.7 : c === 'A' ? 0.68 : 0.66;
+  const tot = [...word].reduce((a, c) => a + wid(c) * LH, 0) + gap * 5; let cx = (sx0 + sx1) / 2 - tot / 2; const geos = [], bulbs = [], halos = [];
+  [...word].forEach((c, i) => { const y0 = 3.06 + i * 0.065, x0 = cx; halos.push([x0 + wid(c) * LH / 2, y0 + LH / 2]);
+    for (const pl of L[c]) for (let k = 0; k < pl.length - 1; k++) { const ax = x0 + pl[k][0] * LH, ay = y0 + pl[k][1] * LH, bx = x0 + pl[k + 1][0] * LH, by = y0 + pl[k + 1][1] * LH, len = Math.hypot(bx - ax, by - ay);
+      const g = new THREE.BoxGeometry(len + SW * 0.85, SW, DEP); g.rotateZ(Math.atan2(by - ay, bx - ax)); g.translate((ax + bx) / 2, (ay + by) / 2, SZ + DEP / 2); geos.push(g);
+      const step = LITE ? 0.17 : 0.105, nb = Math.max(1, Math.round(len / step)); for (let j = (k === 0 ? 0 : 1); j <= nb; j++) bulbs.push([ax + (bx - ax) * j / nb, ay + (by - ay) * j / nb]); }
+    cx += wid(c) * LH + gap; });
+  const bodyM = std({ color: '#e9cf98', emissive: '#c08a3c', emissiveIntensity: 0.55, roughness: 0.45, metalness: 0.15 });
+  for (const g of geos) addG(g, bodyM);
+  const bm = new THREE.MeshBasicMaterial({ color: '#ffffff', toneMapped: false }); const IM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.034, LITE ? 6 : 8, LITE ? 4 : 6), bm, bulbs.length); const mm = new THREE.Matrix4(), base = new THREE.Color(2.4, 1.95, 1.3), cc = new THREE.Color();
+  bulbs.forEach((b, i) => { mm.makeTranslation(b[0], b[1], SZ + DEP + 0.02); IM.setMatrixAt(i, mm); IM.setColorAt(i, base); }); scene.add(IM);
+  const hT = textTex(128, 128, (x, w, h) => { const g = x.createRadialGradient(64, 64, 4, 64, 64, 64); g.addColorStop(0, 'rgba(255,200,120,0.55)'); g.addColorStop(0.45, 'rgba(255,170,80,0.2)'); g.addColorStop(1, 'rgba(255,150,60,0)'); x.fillStyle = g; x.fillRect(0, 0, w, h); });
+  const hM = new THREE.MeshBasicMaterial({ map: hT, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  for (const [hx, hy] of halos) { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7), hM); m.position.set(hx, hy, SZ + 0.005); scene.add(m); }
+  { const m = new THREE.Mesh(new THREE.PlaneGeometry(sx1 - sx0 + 1.5, 4.2), new THREE.MeshBasicMaterial({ map: hT, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set((sx0 + sx1) / 2, 0.025, 1.9); scene.add(m); }
+  if (!LITE) { const l = new THREE.PointLight('#ffc27a', 9, 8, 1.6); l.position.set((sx0 + sx1) / 2, 3.2, 1.4); scene.add(l); }
+  else { const l = new THREE.PointLight('#ffc27a', 6, 7, 1.6); l.position.set((sx0 + sx1) / 2, 3.2, 1.4); scene.add(l); }
+  const ph = bulbs.map(() => Math.random() * 100); let acc = 0;
+  return { IM, update(dt, t) { acc += dt; if (acc < 0.08) return; acc = 0; for (let i = 0; i < bulbs.length; i++) { const k = 0.82 + 0.18 * Math.sin(t * 2.2 + ph[i]) + (Math.sin(t * 7.3 + ph[i] * 3) > 0.985 ? -0.5 : 0); cc.copy(base).multiplyScalar(k); IM.setColorAt(i, cc); } IM.instanceColor.needsUpdate = true; } };
+})();
 // vecino de la izquierda: bar de tapas (solo fachada)
 { B(-30, 0, -0.4, -6.56, PORT_H, 0.0, M.stone); for (const [a, b] of [[-26, -21], [-19.5, -14.5], [-13, -8]]) { B(a, 0.1, -0.02, b, 3.0, 0.02, std({ color: '#4a2e18', emissive: '#ffa860', emissiveIntensity: 0.55, roughness: 0.2 })); for (let x = a; x <= b; x += (b - a) / 3) B(x - 0.03, 0.1, 0.0, x + 0.03, 3.0, 0.05, M.frame); }
   const t = textTex(512, 96, (x, w, h) => { x.fillStyle = '#2a1a10'; x.fillRect(0, 0, w, h); x.fillStyle = '#f2d8a0'; x.font = 'italic bold 56px Georgia, serif'; x.textAlign = 'center'; x.fillText('Bar de Tapas', w / 2, 66); });
@@ -1055,7 +1085,7 @@ const PL_ = (c, i, d, x, y, z) => { const l = new THREE.PointLight(c, i, d, 1.6)
 const LIGHTS = { bar: PL_('#ffb860', 9, 9, 1.2, 2.3, -7.3), bar2: LITE ? null : PL_('#ffb860', 7, 8, 5.2, 2.3, -7.3), room1: PL_('#B03CFF', 12, 12, -1.5, 3.0, -3.0), room2: PL_('#FF2BD0', LITE ? 0 : 9, 10, 4.5, 3.0, -2.5),
   stage: PL_('#ff2a1a', 14, 9, 9.6, 3.0, -3.7), dj: PL_('#2A3CFF', 8, 6, -4.6, 2.6, -3.5), baths: PL_('#e8f0ff', 6, 8, -9.4, 3.0, -7.7), street: PL_('#ffd6a0', 16, 22, 2.4, 7.0, 8.0), street2: LITE ? null : PL_('#ffd6a0', 14, 22, -12, 7.0, 8.0), portico: PL_('#fff0d8', 9, 12, 1.5, 4.2, 2.0) };
 if (!LITE) { LIGHTS.stage.castShadow = false; }
-window.HW = { scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
+window.HW = { scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
 })();
 </script>
 <script type="module">document.getElementById('logo').src = window.HANGAR_IMG.logo; // ===== HANGAR · juego (exploración libre) =====
@@ -1162,7 +1192,7 @@ function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = M
   ledT += dt; if (ledT > (LITE ? 0.12 : 0.05)) { drawLED(T); ledT = 0; } }
 // ---------- bucle ----------
 let STATE = TEST ? 'play' : 'menu', topCam = null;
-function update(dt) { T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); ALVARO.djPose(alv, AC ? (AC.currentTime - 0.1) : T, BPM); updLights(dt); W.updTraffic(dt); updAudio(); }
+function update(dt) { T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); ALVARO.djPose(alv, AC ? (AC.currentTime - 0.1) : T, BPM); updLights(dt); W.updTraffic(dt); W.MARQ.update(dt, T); updAudio(); }
 let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); renderer.render(scene, topCam || camera); updTags(); } requestAnimationFrame(loop); }
 // menú de entrada
 $('go').addEventListener('pointerdown', e => { e.preventDefault(); startAudio(); STATE = 'play'; $('menu').classList.remove('on'); $('hud').classList.add('on'); });
