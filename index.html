@@ -1780,7 +1780,7 @@ function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = M
 // ---------- bucle ----------
 let STATE = TEST ? 'play' : 'menu', topCam = null;
 function update(dt) { if (HOOK.dt) dt = HOOK.dt(dt); T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) n.userData.update(dt, { speed: 0, grounded: true, dance: !!(HOOK.npcDance && HOOK.npcDance(n)), wave: !!(n.userData.waveT > 0 && (n.userData.waveT -= dt) > 0) }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
-let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); if (HOOK.ui) HOOK.ui(dt); } requestAnimationFrame(loop); }
+let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); if (!(window.NOCHE && NOCHE.ASTRAL && NOCHE.ASTRAL.on && NOCHE.ASTRAL.t >= 1.1)) renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); if (HOOK.ui) HOOK.ui(dt); } requestAnimationFrame(loop); }
 // ---------- la noche (bucle de juego, barra, guardarropa, baños, taburetes) ----------
 // ===== HANGAR · LA NOCHE (fase 2): 22:00→06:00 en 5 min, FAMA / EXPULSIÓN, encargos, barra sin grifo, guardarropa, baños, taburetes =====
 // (se inyecta DENTRO del cierre de hgame.js: usa P, ant, PJ, NPCS, STAFF, W, HOOK, AC…)
@@ -2309,7 +2309,56 @@ function konami80s() { N.konami = !N.konami; document.body.style.filter = N.kona
   sfx('ding'); fama(15, '🕹️ ¡Código Konami: Modo 80s!'); evt('🕹️ ¡MODO 80s ACTIVADO! (↑↑↓↓←→←→BA)', 4.0); }
 addEventListener('keydown', e => { if (e.code === KON[konI]) { konI++; if (konI === KON.length) { konI = 0; konami80s(); } } else konI = e.code === KON[0] ? 1 : 0; });
 
+
+// ==================== VIAJE ASTRAL EN EL WC DEL HANGAR (enlaza con La Curva en /hangar/curva-hangar/ y /hangar/hangar-curva/) ====================
+const ASTRAL_WC = [[-11.0, -10.0], [-11.0, -4.2]]; // tazas de los dos baños (chicos y chicas)
+const ASTRAL = { on: false, t: 0, built: false, scene: null, cam: null, lines: null, rings: [], sc0: 0.82, wc: null };
+function wcNear(maxD) { for (const [wx, wz] of ASTRAL_WC) if (Math.hypot(P.pos.x - wx, P.pos.z - wz) < maxD) return [wx, wz]; return null; }
+function buildAstral() { if (ASTRAL.built) return; ASTRAL.built = true;
+  const S = new THREE.Scene(); S.background = new THREE.Color('#060016'); S.environment = scene.environment; ASTRAL.scene = S;
+  ASTRAL.cam = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 400);
+  const N = LITE ? 600 : 1200, pos = new Float32Array(N * 6), col = new Float32Array(N * 6); ASTRAL.st = [];
+  for (let i = 0; i < N; i++) { const a = Math.random() * Math.PI * 2, r = 1.6 + Math.random() ** 0.7 * 22; ASTRAL.st.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, z: -Math.random() * 240, h: Math.random() }); }
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); lg.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  ASTRAL.lines = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false })); ASTRAL.lines.frustumCulled = false; S.add(ASTRAL.lines);
+  for (let i = 0; i < 12; i++) { const m = new THREE.Mesh(new THREE.TorusGeometry(6.5, 0.08, 6, 40), new THREE.MeshBasicMaterial({ color: '#ff4fd8', transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })); m.position.z = -i * 20; S.add(m); ASTRAL.rings.push(m); }
+  S.add(new THREE.AmbientLight('#ffffff', 1.1)); const dl = new THREE.DirectionalLight('#ffffff', 1.8); dl.position.set(2, 4, 5); S.add(dl); }
+function startAstral(wc) { if (ASTRAL.on) return; buildAstral(); ASTRAL.on = true; ASTRAL.t = 0; ASTRAL.wc = wc || [-11.0, isGirl() ? -4.2 : -10.0]; ASTRAL.sc0 = ant.scale.x;
+  closeBar(); closeReq(); closePhone(); if (PL.ride) dismountMoto(true);
+  sfx('cheer'); evt('🌀 ¡La cisterna del Hangar te absorbe! ¡RUMBO A LA CURVA!', 4.2);
+  say(ant, '¡¡QUE ME TRAGA EL VÁTER!! ¡¡NOS VEMOS EN EL ÚLTIMO TANGO!! 🌀', { pri: 9, cls: 'me', dur: 4.5 });
+  if (AC) { const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(220, t); o.frequency.exponentialRampToValueAtTime(55, t + 1.1); o.frequency.exponentialRampToValueAtTime(660, t + 3.2); g.gain.setValueAtTime(0.18, t); g.gain.exponentialRampToValueAtTime(0.01, t + 3.3); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + 3.35); } }
+function finishAstral() { ASTRAL.on = false; const id = antCfg.id || 'antonio';
+  // guarda el personaje en ambas claves y salta a La Curva (copia dentro del repo hangar)
+  const gi = GANG.findIndex(g => g.id === id); if (gi >= 0) { store.set('hangar_pj', gi); store.set('lacurva_pj', gi); }
+  const base = new URL(window.HANGAR_PORTAL_URL || './curva-hangar/', location.href).href.split('?')[0]; const target = base + '?desde=hangar&pj=' + encodeURIComponent(id) + (TEST ? '&test=1' : '') + (TOUCH ? '&touch=1' : '');
+  window.__astralRedirect = target;
+  if (!Q.has('noredir')) location.href = target; }
+function updAstral(dt) { if (!ASTRAL.on) return; ASTRAL.t += dt; const t = ASTRAL.t;
+  if (t < 1.1) { // fase 0: remolino hacia la taza del WC
+    const k = t / 1.1, [wx, wz] = ASTRAL.wc;
+    P.pos.x += (wx - P.pos.x) * Math.min(1, dt * 6); P.pos.z += (wz - P.pos.z) * Math.min(1, dt * 6);
+    ant.position.set(P.pos.x, 0.35 * Math.sin(k * Math.PI), P.pos.z); ant.rotation.set(0, P.yaw + k * k * 24, 0);
+    ant.scale.setScalar(ASTRAL.sc0 * (1 - 0.85 * k * k));
+    camera.position.lerp(V3(wx + 1.4, 2.1, wz + 0.4), Math.min(1, dt * 5)); camera.lookAt(wx, 0.4, wz);
+    return; }
+  if (t - dt < 1.1) { ASTRAL.scene.add(ant); ant.position.set(0, -0.5, -3.2); $('hud').classList.remove('on'); }
+  const g = t - 1.1, C = ASTRAL.cam; C.aspect = innerWidth / innerHeight; C.updateProjectionMatrix();
+  C.position.set(Math.sin(g * 0.9) * 0.5, Math.cos(g * 0.7) * 0.35, 0); C.rotation.set(0, 0, g * 0.45);
+  const sp = 95, lp = ASTRAL.lines.geometry.attributes.position.array, lc = ASTRAL.lines.geometry.attributes.color.array, col = new THREE.Color();
+  for (let i = 0; i < ASTRAL.st.length; i++) { const s = ASTRAL.st[i]; s.z += sp * dt; if (s.z > 2) s.z -= 240; const k = i * 6;
+    lp[k] = s.x; lp[k + 1] = s.y; lp[k + 2] = s.z; lp[k + 3] = s.x; lp[k + 4] = s.y; lp[k + 5] = s.z - 3.2;
+    col.setHSL((s.h + g * 0.3) % 1, 1, 0.62); lc[k] = col.r; lc[k + 1] = col.g; lc[k + 2] = col.b; lc[k + 3] = col.r * 0.1; lc[k + 4] = col.g * 0.1; lc[k + 5] = col.b * 0.1; }
+  ASTRAL.lines.geometry.attributes.position.needsUpdate = ASTRAL.lines.geometry.attributes.color.needsUpdate = true;
+  ASTRAL.rings.forEach((r, i) => { r.position.z += sp * 0.55 * dt; if (r.position.z > 3) r.position.z -= 240; r.material.color.setHSL((i * 0.08 + g * 0.45) % 1, 1, 0.6); r.rotation.z = g * (i % 2 ? 1 : -1) * 0.7; });
+  ant.scale.setScalar(ASTRAL.sc0 * Math.min(1, g / 0.5)); ant.rotation.set(g * 1.9, g * 2.5, Math.sin(g * 1.3) * 0.7);
+  ant.userData.update(dt, { speed: 0.6, grounded: false, wave: true, dance: true });
+  topCam = null; renderer.render(ASTRAL.scene, C);
+  if (g >= 2.3) { scene.add(ant); ant.scale.setScalar(ASTRAL.sc0); finishAstral(); } }
+
 function findEggAction(x, z, ins) {
+  if (ASTRAL.on) return null;
+  if (!EXPLORE) { const wc = wcNear(1.25); if (wc) return act('astral', '🌀 Tirar de la cadena (Viaje astral a La Curva)', () => startAstral(wc)); }
   if (PL.ride) return act('moto', 'Bajarse de ' + PL.ride.name, () => dismountMoto(false));
   const m = motoNear(1.25); if (m) return act('moto', 'Montarse en ' + m.name, () => mountMoto(m));
   if (!N.live && ins && x > 7.6 && z > -5.2 && z < -2.0) return act('drums', '🥁 Tocar la batería de Los Faros', playDrums);
@@ -2348,14 +2397,14 @@ bAct.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagatio
 function updAction() { const a = STATE === 'play' ? findAction() : null; ACT = a; const lab = a ? a.lab : ''; if (lab !== updAction.l) { updAction.l = lab; if (a) { promptEl.innerHTML = (TOUCH ? '' : '<kbd>E</kbd>') + lab; promptEl.style.display = 'block'; promptEl.classList.toggle('warn', !!a.warn); bAct.textContent = lab.length > 22 ? lab.split(' ').slice(0, 3).join(' ') + '…' : lab; bAct.classList.add('ready'); } else { promptEl.style.display = 'none'; bAct.textContent = 'ACCIÓN'; bAct.classList.remove('ready'); } } }
 // ---------- ganchos en el jugador ----------
 HOOK.input = (I, dt) => { if (N.stats.drinks >= 4 && (Math.abs(I.x) + Math.abs(I.z) > 0.1)) { const k = Math.min(0.45, (N.stats.drinks - 3) * 0.12); return { x: I.x + Math.sin(T * 1.7) * k, z: I.z + Math.cos(T * 1.3) * k * 0.6, run: I.run }; } return I; };
-HOOK.move = (dt, I) => { if (PL.ko) { stepKO(dt); return true; } if (PL.ride) { stepMoto(dt, I); return true; } const mv = Math.abs(I.x) + Math.abs(I.z) > 0.25;
+HOOK.move = (dt, I) => { if (ASTRAL.on) return true; if (PL.ko) { stepKO(dt); return true; } if (PL.ride) { stepMoto(dt, I); return true; } const mv = Math.abs(I.x) + Math.abs(I.z) > 0.25;
   if (PL.stool) { if (mv && PL.onStoolT > 0.35) { hopOff(I); return false; } const s = PL.stool; P.pos.x = s.x; P.pos.z = s.z; P.pos.y = Math.min(s.h + 0.08, P.pos.y + dt * 4); P.vel.set(0, 0, 0); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: 0, grounded: true, dance: true }); return true; }
   if (PL.q >= 0) { if (mv) { qLeave('P'); return false; } const [tx, tz] = PL.qT || qPos(PL.q); const dx = tx - P.pos.x, dz = tz - P.pos.z, d = Math.hypot(dx, dz); let sp = 0; if (d > 0.05) { const st = Math.min(d, 1.4 * dt); P.pos.x += dx / d * st; P.pos.z += dz / d * st; P.yaw += angDiff(P.yaw, Math.atan2(dx, dz)) * Math.min(1, dt * 8); sp = 0.55; } else P.yaw += angDiff(P.yaw, Math.PI) * Math.min(1, dt * 6);
     P.vel.set(0, 0, 0); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: sp, grounded: true }); if (PL.q === 0 && d < 0.1 && !drkOpen && !Q_.srv && !PL.drink) openBar(false); return true; }
   if (mv && PL.dance) PL.dance = false; return false; };
 HOOK.after = dt => { checkAvenue(dt); if (goldVinyl.visible && Math.hypot(P.pos.x - goldVinyl.position.x, P.pos.z - goldVinyl.position.z) < 1.45) { goldVinyl.visible = false; sfx('ding'); fama(20, '💿 ¡Vinilo de Oro secreto del Hangar!'); say(ant, '¡Un vinilo de oro detrás del botellero!', { pri: 4, cls: 'me' }); }
   if (parkCoin.visible && Math.hypot(P.pos.x - parkCoin.position.x, P.pos.z - parkCoin.position.z) < 1.3) { parkCoin.visible = false; sfx('ding'); fama(12, '🪙 Moneda de la suerte del parque'); say(ant, '¡Mira, una moneda brillante en el banco!', { pri: 3, cls: 'me' }); } stoolContact(dt); if (ticketMesh.visible && Math.hypot(P.pos.x - ticketMesh.position.x, P.pos.z - ticketMesh.position.z) < 0.6) { ticketMesh.visible = false; N.ticket.lost = false; done('ticket'); N.done.delete('ticket'); evt('🎟 ¡Ticket recuperado!', 2.4); say(ant, '¡Mi ticket! Ozú, qué susto.', { pri: 3, cls: 'me' }); updInv(); } };
-HOOK.upd = dt => { goldVinyl.rotation.y += dt * 2.2; parkCoin.rotation.z += dt * 2.6; STUPID.upd(dt); updCat(dt); if (danceAllT > 0) danceAllT -= dt; updAmb(dt); updGreeter(dt); updMatch(dt); updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC]) updW(w, dt); if (VANE) updW(VANE, dt);
+HOOK.upd = dt => { if (ASTRAL.on) { updAstral(dt); return; } goldVinyl.rotation.y += dt * 2.2; parkCoin.rotation.z += dt * 2.6; STUPID.upd(dt); updCat(dt); if (danceAllT > 0) danceAllT -= dt; updAmb(dt); updGreeter(dt); updMatch(dt); updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC]) updW(w, dt); if (VANE) updW(VANE, dt);
   if (PL.dance && !PL.stool && STATE === 'play') ant.userData.update(dt * 0.001, { speed: 0, grounded: true, dance: true });
   if (PL.sipT > 0) { PL.sipT -= dt; const a = ant.userData.arms[1]; const k = Math.sin(Math.min(1, (1 - PL.sipT) / 1) * Math.PI); a.rotation.x = -2.3 * k; a.rotation.z = -0.35 * k; }
   if (drkOpen && (Math.hypot(P.pos.x - drkOpen.x, P.pos.z - (-6.8)) > 1.8 || P.pos.z > -5.0) && PL.q < 0) closeBar();
@@ -2375,7 +2424,7 @@ HOOK.start = () => { if (EXPLORE) { document.body.classList.remove('juego'); ret
   P.pos.set(1.75, 0, 6.2); P.yaw = Math.PI; P.vel.set(0, 0, 0); cam.yaw = 0; refill(); renderTasks(); updInv(); pickTheme(); evt('🌙 22:00 · ' + THEME.tag + ' en el Hangar', 3.2); setTimeout(() => say(alv, THEME.line, { pri: 3, dur: 4.8 }), 1200); updHUD(); };
 $('again').addEventListener('click', () => { $('end').classList.remove('on'); $('hud').classList.add('on'); STATE = 'play'; HOOK.start(); });
 $('change').addEventListener('click', () => { $('end').classList.remove('on'); $('menu').classList.add('on'); STATE = 'menu'; document.body.classList.remove('juego'); resetNight(); });
-window.NOCHE = { MOTO, mountMoto, dismountMoto, konami80s, petCat, knockCuartillo, playDrums, flipPicnic, goldVinyl, parkCoin, CAT, STUPID, openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
+window.NOCHE = { ASTRAL, startAstral, finishAstral, MOTO, mountMoto, dismountMoto, konami80s, petCat, knockCuartillo, playDrums, flipPicnic, goldVinyl, parkCoin, CAT, STUPID, openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
 
 // menú de entrada
 function choose(i) { selIdx = i; ant = PJ[i]; antCfg = ROSTER[i]; if (!EXPLORE) store.set('hangar_pj', i); placeNPCs(); retag(); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.visible = true; }
@@ -2391,12 +2440,15 @@ function enter() { startAudio(); choose(selIdx); STATE = 'play'; $('menu').class
 $('go').addEventListener('click', e => { e.preventDefault(); enter(); });
 if (EXPLORE) document.body.classList.add('explorar');
 if (TEST) { $('menu').classList.remove('on'); $('hud').classList.add('on'); $('hint').classList.add('off'); if (HOOK.start) HOOK.start(); }
+const FROM_CURVA = Q.get('desde') === 'curva';
+if (FROM_CURVA && !TEST) { STATE = 'play'; $('menu').classList.remove('on'); $('hud').classList.add('on'); if (HOOK.start) HOOK.start(); P.pos.set(-7.2, 0, -7.5); P.yaw = Math.PI / 2; cam.yaw = -Math.PI / 2; ant.position.copy(P.pos); flash(); setTimeout(() => { evt('🌀 ¡Has aterrizado desde el WC de La Curva!', 3.8); say(ant, '¡Ozú, qué viaje astral! ¡He salido por el baño del Hangar!', { pri: 5, cls: 'me', dur: 5 }); }, 300); }
+else if (FROM_CURVA && TEST) { P.pos.set(-7.2, 0, -7.5); P.yaw = Math.PI / 2; ant.position.copy(P.pos); }
 // precompila y arranca
 renderer.compile(scene, camera); $('load').classList.remove('on'); if (!TEST) $('menu').classList.add('on');
 loop();
 // ---------- API de pruebas ----------
 window.GAME = { P, cam, W, get ant() { return ant; }, PJ, NPCS, STAFF, MODE, selIdx: () => selIdx, choose(i) { choose(i); }, alv, camera, renderer,
-  step(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); renderer.render(scene, topCam || camera); updTags(); if (HOOK.ui) HOOK.ui(1 / 60); },
+  step(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); if (!(window.NOCHE && NOCHE.ASTRAL && NOCHE.ASTRAL.on && NOCHE.ASTRAL.t >= 1.1)) renderer.render(scene, topCam || camera); updTags(); if (HOOK.ui) HOOK.ui(1 / 60); },
   sim(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); }, // sin render (pruebas rápidas)
   setInput(i) { INPUT = i; }, music() { if (!AN) return null; const d = new Float32Array(2048); AN.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { song: song && song.n, bpm: BPM, step: stepN, pk, t: AC.currentTime, st: AC.state }; }, startMusic(i, bar) { startAudio(); if (i != null) { songI = i - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.05; } if (bar) { pickSong(songI + 1, nextStep); stepN = bar * 8; } }, arm() { return armLen; }, camClear, tp(x, z, yaw) { P.pos.set(x, groundAt(x, z), z); if (yaw != null) { P.yaw = yaw; cam.yaw = yaw + Math.PI; } cam.target.copy(P.pos).add(V3(0, 1.25, 0)); collide(P.pos); ant.position.copy(P.pos); ant.rotation.y = P.yaw; },
   view(px, py, pz, tx, ty, tz, fov) { camMode = 'fixed'; topCam = null; W.CEIL.visible = true; W.BLD.visible = true; W.ROOF.visible = true; camera.position.set(px, py, pz); camera.near = 0.1; camera.fov = fov || camera.fov; camera.updateProjectionMatrix(); camera.lookAt(tx, ty, tz); },
