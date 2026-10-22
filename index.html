@@ -68,6 +68,31 @@ body.juego #evt{top:calc(env(safe-area-inset-top) + 120px)}@media (min-aspect-ra
 .bub.me{background:#fff3c4}
 .touch .bub{font-size:15px;max-width:200px}
 #end{background:rgba(11,12,20,.88)}#end h1{margin:4px 0;font-size:clamp(26px,7vw,44px);color:#ffd67a}#end h3{margin:0;opacity:.9}#endStats{font-size:14px;line-height:1.6;margin:10px 0;opacity:.9}
+
+/* --- fase 3: petición de canción + móvil Tinder + foco lento --- */
+#req{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(11,12,20,.92);border:2px solid #00d5ff;border-radius:16px;padding:9px;display:none;pointer-events:auto;flex-direction:column;gap:6px;width:min(480px,94vw)}#req.on{display:flex}
+#req h5{margin:0;text-align:center;font-size:13px}#req .sgs{display:grid;grid-template-columns:1fr 1fr;gap:5px}#req .deds{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+#req button{font-family:inherit;font-weight:800;font-size:12.5px;border:2px solid transparent;border-radius:11px;padding:7px 9px;background:#22243a;color:#fff;cursor:pointer}
+#req button.sel{border-color:#00d5ff;background:#2a3c60}#req .go{background:#ff2bd0;font-size:14px;padding:9px}#req .x{background:#3a3550}
+.touch #req{bottom:calc(env(safe-area-inset-bottom) + 170px)}
+#bPh{width:54px;height:54px;right:calc(env(safe-area-inset-right) + 22px);top:calc(env(safe-area-inset-top) + 122px);font-size:22px;display:none}
+body.juego #bPh{display:flex}
+#phone{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 74px);width:min(286px,80vw);z-index:18;background:#0b0c12;border:3px solid #30343f;border-radius:34px;padding:10px;box-shadow:0 18px 50px rgba(0,0,0,.65);opacity:0;pointer-events:none;transform:translate(-50%,30px) scale(.92);transition:opacity .25s,transform .3s}
+#phone.on{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}
+#phone:before{content:"";position:absolute;left:50%;top:14px;width:64px;height:14px;margin-left:-32px;border-radius:9px;background:#000;z-index:3}
+#phScr{position:relative;height:min(430px,56vh);border-radius:25px;overflow:hidden;background:#fff;color:#1d2533;display:flex;flex-direction:column}
+.tHead{padding:26px 10px 4px;text-align:center;font-weight:900;font-size:21px;color:#fd4f6b;position:relative}.tHead i{position:absolute;right:12px;top:24px;font-style:normal;cursor:pointer;color:#888;font-size:18px}
+.tStack{position:relative;flex:1;margin:0 12px}
+.tCard{position:absolute;inset:0;border-radius:16px;overflow:hidden;background:#2a2440;box-shadow:0 6px 16px rgba(0,0,0,.25);transition:transform .28s,opacity .28s;touch-action:none}
+.tCard img{width:100%;height:100%;object-fit:cover;display:block}
+.tInfo{position:absolute;left:0;right:0;bottom:0;padding:38px 11px 9px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.85));color:#fff;font-size:18px;text-align:left}
+.tInfo small{display:block;font-size:11px;opacity:.85;font-weight:700}.tInfo p{margin:3px 0 0;font-size:12px;line-height:1.22;font-weight:600}
+.tRow{display:flex;justify-content:center;gap:24px;padding:8px 0 6px}
+.tB{width:52px;height:52px;border-radius:50%;border:0;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.22);font-size:24px;font-weight:900;cursor:pointer}.tB.no{color:#ff4d6d}.tB.yes{color:#3ee89c}
+.tMatch{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(253,41,123,.93),rgba(255,101,91,.95));color:#fff;text-align:center;padding:12px}
+.tMatch b{font-size:28px;font-weight:900;font-style:italic}.tMatch small{font-weight:800;margin-top:6px;font-size:13px}
+@media (min-aspect-ratio:1/1){#phone{top:auto;bottom:20px;left:auto;right:22px;transform:translate(0,30px) scale(.92)}#phone.on{transform:none}}
+#themeTag{display:inline-block;background:rgba(255,43,208,.28);border:1px solid #ff2bd0;border-radius:8px;padding:1px 6px;font-size:10px;font-weight:900;letter-spacing:1px;margin-left:6px;vertical-align:middle}
 </style></head><body>
 <div id="layer"></div>
 <div id="load" class="scr on"><div style="font-weight:900;letter-spacing:6px;font-size:42px">HANGAR</div><div class="sub">Montando el local…</div></div>
@@ -76,11 +101,14 @@ body.juego #evt{top:calc(env(safe-area-inset-top) + 120px)}@media (min-aspect-ra
 <button class="btn" id="go">ENTRAR</button>
 <div class="keys">Ordenador: <b>WASD / flechas</b> para andar · <b>Mayús</b> correr · <b>arrastrar ratón</b> girar cámara · <b>rueda</b> zoom · <b>C</b> cámara cerca/lejos<br>Móvil: <b>joystick</b> a la izquierda · <b>arrastra</b> a la derecha para girar · botón <b>CORRER</b></div></div>
 <div id="hud"><div id="title">HANGAR<small>Álvaro está pinchando</small></div><div id="hint">🔊 Toca la pantalla para oír la música</div>
-<div id="night"><div id="clk">22:00<small id="phase">Abren las puertas</small></div><div class="bar" id="bFama"><i></i><b>FAMA</b></div><div class="bar" id="bExp"><i></i><b>EXPULSIÓN</b></div></div>
+<div id="night"><div id="clk">22:00<span id="themeTag">INDIE</span><small id="phase" style="display:block;margin:2px 0 0">Abren las puertas</small></div><div class="bar" id="bFama"><i></i><b>FAMA</b></div><div class="bar" id="bExp"><i></i><b>EXPULSIÓN</b></div></div>
 <div id="tasks"><h4>ENCARGOS DE LA NOCHE</h4></div><div id="inv"></div><div id="evt"></div><div id="prompt"></div>
+<div id="req"><h5>🎧 Pídele un tema a Álvaro</h5><div class="sgs"></div><div class="deds"></div><div style="display:flex;gap:6px"><button class="go" style="flex:1">¡PONLA, ÁLVARO!</button><button class="x">Cerrar</button></div></div>
+<div id="phone"><div id="phScr"></div></div>
+<div class="tb" id="bPh" title="Móvil (M)">📱</div>
 <div id="drk"><h5>🍺 ¿Qué te pongo? <small style="opacity:.7">(aquí no hay grifo)</small></h5></div>
 <div class="tb" id="bAct">ACCIÓN</div>
-<div id="keysd"><b>WASD</b> andar · <b>Mayús</b> correr · <b>ratón</b> cámara · <b>C</b> zoom · <b>E</b> acción</div>
+<div id="keysd"><b>WASD</b> andar · <b>Mayús</b> correr · <b>ratón</b> cámara · <b>C</b> zoom · <b>E</b> acción · <b>M</b> móvil</div>
 <div id="joy"><i></i></div><div id="joyHint">MUÉVETE<br>AQUÍ</div><div class="tb" id="bRun">CORRER</div><div class="tb" id="bCam">🎥</div></div>
 <div id="end" class="scr"><h3 id="endWhy">¡Echamos el cierre! 06:00</h3><h1 id="endTitle">Leyenda del Hangar</h1><div id="endStats"></div><div><button class="btn" id="again">OTRA NOCHE</button><button class="btn" id="change" style="background:#3b3560;box-shadow:0 5px 0 #1c1a30">CAMBIAR DE PERSONAJE</button></div></div>
 <div id="flash"></div>
@@ -1695,7 +1723,7 @@ const beatPhase = () => AC ? ((((AC.currentTime - T0) / BEAT) % 1) + 1) % 1 : (T
 // ---------- luces animadas ----------
 const LC = W.LED_C.getContext('2d'); let ledT = 0;
 function drawLED(t) { const w = 256, h = 128; LC.fillStyle = '#05050a'; LC.fillRect(0, 0, w, h); const hue = (t * 40) % 360; { const g = LC.createLinearGradient(0, 0, w, h); g.addColorStop(0, `hsl(${hue},70%,14%)`); g.addColorStop(1, `hsl(${(hue + 60) % 360},70%,22%)`); LC.fillStyle = g; LC.fillRect(0, 0, w, h); } // (sin barras de ecualizador)
-  LC.fillStyle = '#ffffff'; LC.font = 'bold 34px Arial Black, sans-serif'; LC.textAlign = 'center'; LC.globalAlpha = 0.85; LC.fillText('HANGAR', w / 2, 46 + Math.sin(t * 2) * 3); LC.font = 'bold 11px Arial'; LC.fillText('CÓRDOBA · MÚSICA EN DIRECTO', w / 2, 66); LC.globalAlpha = 1; for (let y = 0; y < h; y += 3) { LC.fillStyle = 'rgba(0,0,0,.25)'; LC.fillRect(0, y, w, 1); } W.LED_T.needsUpdate = true; }
+  LC.fillStyle = '#ffffff'; LC.font = 'bold 34px Arial Black, sans-serif'; LC.textAlign = 'center'; LC.globalAlpha = 0.85; LC.fillText('HANGAR', w / 2, 46 + Math.sin(t * 2) * 3); LC.font = 'bold 11px Arial'; LC.fillText(window.LED_SUB || 'CÓRDOBA · MÚSICA EN DIRECTO', w / 2, 66); LC.globalAlpha = 1; for (let y = 0; y < h; y += 3) { LC.fillStyle = 'rgba(0,0,0,.25)'; LC.fillRect(0, y, w, 1); } W.LED_T.needsUpdate = true; }
 const COLS = ['#B03CFF', '#FF2BD0', '#2A3CFF', '#00D5FF'].map(c => new THREE.Color(c));
 function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = Math.floor((AC ? Math.max(0, (AC.currentTime - T0) / BEAT) : T / BEAT) / 4);
   W.BALL.rotation.y += dt * 0.8; const L = W.LIGHTS; L.room1.color.copy(COLS[bar & 3]); if (L.room2.intensity) L.room2.color.copy(COLS[(bar + 2) & 3]); L.room1.intensity = 9 + 6 * kick;
@@ -1707,7 +1735,7 @@ function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = M
   ledT += dt; if (ledT > (LITE ? 0.12 : 0.05)) { drawLED(T); ledT = 0; } }
 // ---------- bucle ----------
 let STATE = TEST ? 'play' : 'menu', topCam = null;
-function update(dt) { T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) n.userData.update(dt, { speed: 0, grounded: true }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
+function update(dt) { if (HOOK.dt) dt = HOOK.dt(dt); T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) n.userData.update(dt, { speed: 0, grounded: true, dance: !!(HOOK.npcDance && HOOK.npcDance(n)), wave: !!(n.userData.waveT > 0 && (n.userData.waveT -= dt) > 0) }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
 let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); if (HOOK.ui) HOOK.ui(dt); } requestAnimationFrame(loop); }
 // ---------- la noche (bucle de juego, barra, guardarropa, baños, taburetes) ----------
 // ===== HANGAR · LA NOCHE (fase 2): 22:00→06:00 en 5 min, FAMA / EXPULSIÓN, encargos, barra sin grifo, guardarropa, baños, taburetes =====
@@ -1882,7 +1910,149 @@ function greet(n) { N.greeted = N.greeted || new Set(); const first = !N.greeted
 function giveBot(n) { PL.round--; if (!n.userData.bot) n.userData.bot = holdIn(n, 'botellin'); sfx('clink'); N.given = (N.given || 0) + 1; say(n, pick(['¡Olé! ¡Eso es un amigo!', '¡Gracias, chiquillo! A la próxima invito yo… o no.', '¡Un botellín! Ozú, qué detalle.', '¡Esa es mi ' + (isGirl() ? 'niña' : 'niño') + '!']), { pri: 3, dur: 4.6, cls: 'g' }); fama(3); renderTasks(); if (N.given >= 3) done('ronda');
   if (PL.round <= 0) { dropDrink(); } else updInv(); }
 // ---------- Álvaro: pedir canción (versión simple; la fase 3 añade dedicatorias y reacción de la pista) ----------
-function askSong() { const now = N.t; PL.req = PL.req.filter(t => now - t < 75); PL.req.push(now); const k = PL.req.length;
+
+// ==================== FASE 3: diálogos de la pandilla (7–12 s), entrante chulo, peticiones a Álvaro, Tinder con match y foco lento, noches temáticas ====================
+// --- noches temáticas (Indie, 80s/90s, Tributo) ---
+const THEMES = {
+  indie: { tag: 'NOCHE INDIE', led: 'NOCHE INDIE · LOS FAROS EN DIRECTO', cols: ['#B03CFF', '#FF2BD0', '#2A3CFF', '#00D5FF'], band: 'Los Faros', line: '¡Hoy toca indie del bueno! Cero reguetón, ¿eh?' },
+  ochenta: { tag: 'NOCHE 80s/90s', led: 'FIESTA 80s/90s · LA EDAD DE ORO', cols: ['#ff2bd0', '#00f0ff', '#ffe600', '#ff5500'], band: 'La Movida del Vial', line: '¡Noche ochentera! Hoy salen todos los de la EGB.' },
+  tributo: { tag: 'NOCHE TRIBUTO', led: 'TRIBUTO ROCK · CLÁSICOS DE SIEMPRE', cols: ['#ff4a2a', '#ffb92e', '#d92b6b', '#ffe27a'], band: 'Héroes del Guadalquivir', line: '¡Hoy es noche de tributo! Se van a saber todas.' } };
+let THEME = THEMES.indie;
+function pickTheme() { const q = Q.get('tema'), ks = Object.keys(THEMES); const k = ks.includes(q) ? q : ks[(Math.random() * ks.length) | 0]; THEME = THEMES[k]; N.theme = k;
+  $('themeTag').textContent = THEME.tag; window.LED_SUB = THEME.led; THEME.cols.forEach((c, i) => COLS[i].set(c)); }
+// --- frases de ambiente de la pandilla (7–12 s entre bocadillos): cordobés, pijo, boomer joven, bro motivacional («panza/burpees/5 AM»), reseñas reales ---
+const AMB_CHAR = {
+  antonio: ['Ozú, qué calor hace aquí dentro… ¿el aire acondicionado es de adorno?', 'He aparcado en Ciudad Jardín. He venido andando desde el mes pasado.', '¿Las once? En el Hangar «las once» es la una y media, chiquillo.'],
+  joseluis: ['En mis tiempos esto era otra cosa… pero oye, ¡que yo sigo siendo un chaval!', '¿Esto es indie? Pues suena igual que en el 92, no me digas que no.', 'Mañana ruta con la bici a las ocho. Bueno, a las once. O el domingo.'],
+  chema: ['Vengo de una cena en El Brillante y me habéis liado… como siempre.', 'Oye, la media de edad hoy es de hipoteca pagada y dos niños en las Esclavas.', '¿Un tercio? En copa de balón no tenéis, ¿verdad? Qué fatiga.'],
+  jaime: ['Bro, levantarse a las 5 AM, hielo en la cara y cero excusas. ¡Mírame, cero panza!', 'Mientras vosotros bebéis tercios yo he hecho 200 burpees en el parking, bro. Mentalidad.', 'Tu validación es tu físico, chiquillo. Agua con gas y a facturar… bueno, ponme un botellín.'],
+  angie: ['Tía, hace un calor aquí dentro que se me está derritiendo hasta el rímel.', 'El baño sin pestillo otra vez: he tenido que hacer sentadilla olímpica sujetando la puerta.', '¿Me haces una foto aquí con los neones? Pero que no salga aquel señor de 50.'],
+  maca: ['O sea, medio Brillante y medio Ciudad Jardín están hoy aquí metidos, qué fuerte.', 'No me quito las gafas de sol ni aunque fundan el último foco que queda vivo.', 'Me han dicho que en el Picnic la hamburguesa Harlem tarda 45 minutos, ideal.'],
+  anita: ['Si Álvaro no pone «Azahar y gasolina» de aquí a diez minutos me subo a la cabina.', '¡Que dice el cartel que el concierto era a las once! ¡Qué poca vergüenza, me encanta!', 'La acústica al lado de la columna tiene su aquel… si te pones detrás no ves nada, claro.'],
+  esther: ['Chiquillo, qué agustito en la terraza… dentro parece una sauna finlandesa.', 'Mira ese de ahí intentando parecer de veinticinco con la camisa por fuera, qué ternura.', '¿Pedimos otra ronda de botellines o nos vamos ya pa’l Vial?'],
+  tagua: ['Hermano, mentalidad de tiburón: 5 AM, ducha fría y cero cruasanes. ¡Fuera panza!', 'Ese de ahí tiene cara de mileurista emocional, bro. Hazme veinte flexiones aquí mismo.', 'He dejado el Tesla cargando y he venido al trote para no perder el cardio, máquina.'],
+  mario: ['¡Esta noche no nos echan ni con agua caliente, ya te lo digo yo!', '¿Pero habéis visto el ambientazo? ¡Si estamos todos los de siempre, chiquillo!', 'Manolo hoy tiene una cara de vinagre que parece que le debemos dinero.'] };
+const AMB_GEN = [
+  'Ozú, qué calor… aquí dentro se podrían asar pimientos.', 'Aparcar en el Vial un viernes debería convalidar como deporte de riesgo.',
+  '¿La banda? Estarán cenando en el Picnic tan panchos.', 'Aquí el más joven hizo la comunión en pesetas, chiquillo.',
+  'El pestillo del baño lleva roto desde que abrieron en 2014.', 'Se ha fundido otro foco del techo, qué romántico todo.',
+  'Bro, el que tenga panza que haga burpees en la terraza. Cero excusas.', 'O sea, te juro que he visto a mi ex del colegio en la barra.',
+  'Qué malaje tiene hoy el camarero… y qué bien tira los botellines.', 'Esto es el Indie de Córdoba: camisas planchadas y dolor de lumbago.' ];
+const AMB_THEME = {
+  indie: ['¡Qué guitarras más jangle, niño! Esto huele a festival de verano.', 'Si tocan la de la terraza me dejo la garganta aquí mismo.'],
+  ochenta: ['¡Esta la bailaba yo cuando tenía pelo!', '¡Ochentera total! Ahora sí que me vengo arriba, chiquillo.'],
+  tributo: ['¡Esa se la sabe hasta Manolo, mira cómo mueve el pie!', 'Nada como los clásicos, déjate de modernidades.'] };
+let ambT = 6;
+function updAmb(dt) { if (EXPLORE || !N.on || N.ended || slomo.on || greeter.busy) return; ambT -= dt; if (ambT > 0) return;
+  if (BUBS.length >= BUB_CAP) { ambT = 2.0; return; }
+  ambT = rnd(7.0, 12.0); // cadencia aprobada: uno nuevo cada 7–12 s
+  const vis = NPCS.filter(n => { const p = headTop(n).project(camera); return p.z < 1 && Math.abs(p.x) < 0.95 && Math.abs(p.y) < 0.95 && n.position.distanceTo(camera.position) < 18; });
+  const pool = vis.length ? vis : NPCS; if (!pool.length) return;
+  const n = pick(pool), id = ROSTER[PJ.indexOf(n)]?.id; const mine = AMB_CHAR[id] || []; const th = AMB_THEME[N.theme] || [];
+  const r = Math.random(); const txt = r < 0.5 && mine.length ? pick(mine) : r < 0.72 || !th.length ? pick(AMB_GEN) : pick(th);
+  say(n, txt.replace('{n}', nm()), { pri: 1, dur: 4.8 }); }
+// --- NPC que entra saludando a todo el mundo y haciéndose el guay ---
+const COOL = EXPLORE ? null : mkW(mkPop({ skin: '#d69c78', hair: { style: 'swept', color: '#241b17', side: '#6e625a', volume: 1.25 }, beard: { style: 'stubble', color: '#4a3a30', dark: '#241b17' }, glasses: { type: 'aviator', frame: '#c9a24a', lens: '#101418', sun: true }, shirt: { type: 'shirt', color: '#f7f5ef', open: true, sleeves: 'long' }, jacket: { color: '#1b2436' }, pants: { color: '#e8dfc8' }, shoes: { color: '#6b4426' } }, true), 1.75, 8.5, Math.PI);
+if (COOL) { COOL.n.visible = false; tag(COOL.n, 'Borja Mari'); }
+const greeter = { next: 32, busy: false };
+const COOL_IN = ['¡Familiaaa! ¿Cómo están los máquinas? ¡Ya estoy aquí, tranquilos!', '¡Qué pasa, gente guapa! Vengo directo del Real Círculo, ¿eh?', '¡Hombreee, mi gente del Hangar! ¡Choca esos cinco, crack!', '¡Buenas noches a todo el mundo! O sea, estáis todos, qué barbaridad.'];
+const COOL_REP = ['Hola, Borja.', 'Buenas.', 'Qué hay.', 'Anda, mira quién viene…', 'Hola, hijo, sí.'];
+function triggerGreeter() { if (!COOL || greeter.busy) return false; greeter.busy = true; COOL.n.visible = true; COOL.n.position.set(1.75, 0, 6.2); COOL.yaw = Math.PI; COOL.wave = true;
+  const t1 = NPCS[0], t2 = NPCS[3] || NPCS[1];
+  say(COOL.n, pick(COOL_IN), { pri: 4, dur: 5.0 });
+  walkTo(COOL, [[1.75, -0.8], [t1.position.x, t1.position.z + 0.95]], () => {
+    COOL.face = Math.atan2(t1.position.x - COOL.n.position.x, t1.position.z - COOL.n.position.z);
+    say(COOL.n, '¡Qué pasa, titán! ¿Cómo va esa vida, fenómeno?', { pri: 4, dur: 4.6 });
+    setTimeout(() => { say(t1, pick(COOL_REP), { pri: 4, dur: 4.5 }); }, 1300);
+    setTimeout(() => { walkTo(COOL, [[t2.position.x - 0.85, t2.position.z + 0.5]], () => {
+      COOL.face = Math.atan2(t2.position.x - COOL.n.position.x, t2.position.z - COOL.n.position.z);
+      say(COOL.n, '¡Estás estupendísim' + (GIRLS.has(ROSTER[PJ.indexOf(t2)]?.id) ? 'a' : 'o') + ', de verdad te lo digo!', { pri: 4, dur: 4.6 });
+      setTimeout(() => say(t2, pick(COOL_REP), { pri: 4, dur: 4.5 }), 1200);
+      setTimeout(() => { COOL.wave = false; walkTo(COOL, [[-2.0, -5.8]], () => { COOL.face = Math.PI; greeter.busy = false; greeter.next = rnd(85, 120); }); }, 3600);
+    }, 1.3); }, 2800);
+  }, 1.35); return true; }
+function updGreeter(dt) { if (!COOL || EXPLORE || !N.on || N.ended) return; updW(COOL, dt); if (!greeter.busy) { greeter.next -= dt; if (greeter.next <= 0) triggerGreeter(); } }
+// --- pedir canción a Álvaro: selector de las 4 originales + dedicatoria + reacción de la pista ---
+const reqEl = $('req'), reqSgs = reqEl.querySelector('.sgs'), reqDeds = reqEl.querySelector('.deds');
+const DEDS = ['para toda la pandilla', 'para mi ex, que está en la barra', 'para los que madrugan mañana', 'para el del Tesla mal aparcado'];
+let reqSong = 0, reqDed = 0, reqOpen = false, danceAllT = 0;
+SONGS.forEach((sg, i) => { const b = document.createElement('button'); b.textContent = '♪ ' + sg.n; b.onclick = e => { e.stopPropagation(); reqSong = i; [...reqSgs.children].forEach((x, k) => x.classList.toggle('sel', k === i)); }; reqSgs.appendChild(b); });
+DEDS.forEach((d, i) => { const b = document.createElement('button'); b.textContent = d; b.onclick = e => { e.stopPropagation(); reqDed = i; [...reqDeds.children].forEach((x, k) => x.classList.toggle('sel', k === i)); }; reqDeds.appendChild(b); });
+reqEl.querySelector('.go').onclick = e => { e.stopPropagation(); submitSong(reqSong, reqDed); };
+reqEl.querySelector('.x').onclick = e => { e.stopPropagation(); closeReq(); };
+reqEl.addEventListener('pointerdown', e => e.stopPropagation());
+function openReq() { const now = N.t; PL.req = PL.req.filter(t => now - t < 75);
+  if (PL.req.length >= 2) { PL.req.push(now); closeReq(); say(alv, '¡Que no soy una gramola, ' + nm() + '! ¡ABAJO de la cabina!', { pri: 5, dur: 5, cls: 'w' }); P.pos.set(-5.3, 0, -5.9); P.vel.set(0, 0, 0); PL.req = []; expl(12, 'Álvaro te ha echado de la cabina'); sfx('boo'); return; }
+  reqSong = (songI + 1) % SONGS.length; [...reqSgs.children].forEach((x, k) => x.classList.toggle('sel', k === reqSong)); [...reqDeds.children].forEach((x, k) => x.classList.toggle('sel', k === reqDed));
+  reqOpen = true; reqEl.classList.add('on'); }
+function closeReq() { reqOpen = false; reqEl.classList.remove('on'); }
+function submitSong(si, di) { closeReq(); const now = N.t; PL.req = PL.req.filter(t => now - t < 75); PL.req.push(now);
+  const sg = SONGS[si % SONGS.length], ded = DEDS[di % DEDS.length] || DEDS[0];
+  if (AC) { songI = (si % SONGS.length) - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.08; } else { songI = si % SONGS.length; song = sg; }
+  say(alv, `🎤 ¡Atención, Hangar! «${sg.n}», de parte de ${nm()} ${ded}!`, { pri: 5, dur: 5.2, cls: 'g' });
+  evt(`🎵 Álvaro pincha «${sg.n}» (${ded})`, 3.6); sfx('cheer'); done('cancion'); fama(4);
+  danceAllT = 12; const react = ['¡¡TEMAZOOO!!', '¡Esa es la nuestra, chiquillo!', '¡Olé ahí, ' + nm() + '!', '¡Vamoos! ¡A la pista!'];
+  NPCS.slice(0, 2).forEach((n, i) => { n.userData.waveT = 2.5; setTimeout(() => say(n, react[i % react.length], { pri: 4, dur: 4.6, cls: 'g' }), 900 + i * 700); }); }
+// --- Tinder (sin notificaciones: sólo cuando el jugador abre el móvil) + match que entra, foco y cámara lenta ---
+const phoneEl = $('phone'), phScr = $('phScr');
+const TIN_BIOS = ['En el Hangar si ponen indie del bueno. Si tienes panza, haz burpees.', 'He venido porque me dijeron que empezaba a las 23:00 🤡', 'Ciudad Jardín / El Brillante. Tercio en mano, nunca caña.', 'Busco a alguien con quien compartir el taxi de las seis.', 'Si te sabes «Noches de Hangar» entera ya tienes medio camino hecho.'];
+const TIN = { open: false, i: 0, cards: [], matched: false, w: null, stage: 0, t: 0 };
+const SPOT = (() => { if (EXPLORE) return null; const g = new THREE.Group();
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(1.55, 4.7, 20, 1, true), new THREE.MeshBasicMaterial({ color: '#ff6bd6', transparent: true, opacity: 0.18, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })); cone.position.y = 2.35;
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.45, 28), new THREE.MeshBasicMaterial({ color: '#ffe27a', transparent: true, opacity: 0.55, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.02;
+  const pl = new THREE.PointLight('#ff7be5', 0, 9, 1.4); pl.position.y = 3.6; g.add(cone, ring, pl); g.visible = false; g.userData.noCam = true; g.traverse(o => { o.userData.noCam = true; }); scene.add(g); g.pl = pl; g.ring = ring; return g; })();
+const slomo = { on: false, t: 0 };
+function buildTinderCards() { const ids = ROSTER.map((_, i) => i).filter(i => i !== selIdx);
+  // preferir del otro sexo al principio, pero meter a todos
+  const opp = ids.filter(i => GIRLS.has(ROSTER[i].id) !== isGirl()), same = ids.filter(i => GIRLS.has(ROSTER[i].id) === isGirl());
+  const ord = [...opp.sort(() => Math.random() - 0.5), ...same.sort(() => Math.random() - 0.5)].slice(0, 4);
+  TIN.cards = ord.map((ri, k) => ({ ri, name: ROSTER[ri].name, age: 31 + (ri * 3) % 14, bio: TIN_BIOS[(ri + k) % TIN_BIOS.length], img: PORTRAITS[ri] || '', match: k === 0 || k === 1 }));
+  TIN.i = 0; }
+function openPhone() { if (EXPLORE || STATE !== 'play') return; if (TIN.open) { closePhone(); return; } closeBar(); closeReq();
+  if (!TIN.cards.length || TIN.i >= TIN.cards.length) buildTinderCards();
+  TIN.open = true; phoneEl.classList.add('on'); renderTinder(); }
+function closePhone() { TIN.open = false; phoneEl.classList.remove('on'); }
+function renderTinder() { phScr.innerHTML = `<div class="tHead">🔥 hangar match <i id="phX">✕</i></div><div class="tStack" id="tSt"></div><div class="tRow"><button class="tB no" id="tNo">✕</button><button class="tB yes" id="tYes">♥</button></div>`;
+  phScr.querySelector('#phX').onclick = closePhone;
+  phScr.querySelector('#tNo').onclick = () => swipe(-1);
+  phScr.querySelector('#tYes').onclick = () => swipe(1);
+  const st = phScr.querySelector('#tSt'), c = TIN.cards[TIN.i];
+  if (!c) { st.innerHTML = '<div style="padding:40px 14px;text-align:center;font-weight:800">No queda nadie más por hoy 😅</div>'; return; }
+  const d = document.createElement('div'); d.className = 'tCard'; d.innerHTML = `<img alt="" src="${c.img}"><div class="tInfo"><b>${c.name}</b>, ${c.age}<small>📍 En la Av. de la Libertad (a 20 m)</small><p>${c.bio}</p></div>`;
+  st.appendChild(d); }
+function swipe(dir) { if (!TIN.open) return; const c = TIN.cards[TIN.i]; if (!c) return; TIN.i++;
+  if (dir > 0 && c.match && !TIN.matched) { TIN.matched = true; const ov = document.createElement('div'); ov.className = 'tMatch'; ov.innerHTML = `<b>¡ES UN MATCH! 💘</b><small>${c.name} acaba de entrar al Hangar y te está buscando…</small>`; phScr.appendChild(ov); sfx('ding'); setTimeout(() => { closePhone(); startMatchScene(c); }, 1100); return; }
+  if (TIN.i >= TIN.cards.length) { closePhone(); evt('📱 Sin match por ahora… prueba luego', 2.4); } else renderTinder(); }
+function startMatchScene(c) { const n = PJ[c.ri]; if (!n) return;
+  // ese personaje entra por la puerta principal y te busca en la pista
+  n.position.set(1.75, 0, 5.8); n.rotation.y = Math.PI;
+  const w = mkW(n, 1.75, 5.8, Math.PI); w.sp = 2.0; w.wave = true; TIN.w = w; TIN.c = c; TIN.stage = 1; TIN.t = 0;
+  evt(`💘 ¡${c.name} ha entrado en el Hangar buscándote!`, 3.6);
+  say(n, `¡${nm()}! ¡He visto el match en la puerta y he entrado corriendo!`, { pri: 5, dur: 5.0, cls: 'g' }); }
+function updMatch(dt) { if (!TIN.w) return; const w = TIN.w, c = TIN.c;
+  if (TIN.stage === 1) { // camina hacia el jugador (entrando primero si el jugador está dentro)
+    const tx = clamp(P.pos.x, -4.5, 6.5), tz = clamp(P.pos.z, -6.2, 5.0);
+    const d = Math.hypot(w.n.position.x - P.pos.x, w.n.position.z - P.pos.z);
+    if (d < 1.35 || (TIN.t += dt) > 9) { w.path = []; w.wave = false; w.n.position.set(P.pos.x + 0.85, 0, P.pos.z + 0.25); w.face = Math.atan2(P.pos.x - w.n.position.x, P.pos.z - w.n.position.z);
+      P.yaw = Math.atan2(w.n.position.x - P.pos.x, w.n.position.z - P.pos.z);
+      TIN.stage = 2; TIN.t = 0; slomo.on = true; slomo.t = 5.5; danceAllT = 9; PL.dance = true; w.dance = true;
+      if (SPOT) { SPOT.visible = true; SPOT.pl.intensity = 18; }
+      if (AC) { songI = -1; song = null; stepN = 0; nextStep = AC.currentTime + 0.05; }
+      say(alv, `💘 ¡Paren las rotativas! ¡Esta es VUESTRA canción, ${nm()} y ${c.name}!`, { pri: 6, dur: 5.2, cls: 'g' });
+      setTimeout(() => say(w.n, `¡Estaba deseando que nos cruzáramos en la pista, ${nm()}! 💃`, { pri: 6, dur: 5.0, cls: 'g' }), 700);
+      fama(30, `💘 ¡Match en la pista con ${c.name}!`); sfx('cheer');
+    } else if (!w.path.length || Math.hypot(w.path[w.path.length - 1].x - tx, w.path[w.path.length - 1].z - tz) > 0.8) {
+      const pts = w.n.position.z > 0.5 && tz < 0 ? [[1.75, -0.8], [tx, tz]] : [[tx, tz]]; walkTo(w, pts, null, 2.1); }
+    updW(w, dt); }
+  else if (TIN.stage === 2) { updW(w, dt); if (SPOT) { SPOT.position.set((P.pos.x + w.n.position.x) / 2, 0, (P.pos.z + w.n.position.z) / 2); SPOT.ring.rotation.z += dt * 1.8; }
+    slomo.t -= dt / 0.42; if (slomo.t <= 0) { slomo.on = false; if (SPOT) { SPOT.visible = false; SPOT.pl.intensity = 0; } TIN.stage = 3; say(w.n, '¡Qué momentazo, chiquillo! Me quedo por aquí contigo.', { pri: 4, dur: 4.8 }); } } }
+addEventListener('keydown', e => { if (e.code === 'KeyM' || e.code === 'KeyT') { e.preventDefault(); startAudio(); openPhone(); } else if (TIN.open && e.code === 'ArrowLeft') swipe(-1); else if (TIN.open && e.code === 'ArrowRight') swipe(1); });
+$('bPh').addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); startAudio(); openPhone(); });
+HOOK.dt = dt => slomo.on ? dt * 0.42 : dt;
+HOOK.npcDance = n => danceAllT > 0 || N.live || (TIN.w && TIN.w.n === n && TIN.w.dance);
+
+function askSong() { openReq(); }
+function _oldAskSong() { const now = N.t; PL.req = PL.req.filter(t => now - t < 75); PL.req.push(now); const k = PL.req.length;
   if (k >= 3) { say(alv, '¡Que no soy una gramola, ' + nm() + '! ¡ABAJO de la cabina!', { pri: 5, dur: 5, cls: 'w' }); P.pos.set(-5.3, 0, -5.9); P.vel.set(0, 0, 0); PL.req = []; expl(12, 'Álvaro te ha echado de la cabina'); sfx('boo'); return; }
   const nx = (songI + 1) % SONGS.length; if (AC) { songI = nx - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.1; }
   say(alv, k === 1 ? `¡Esta va por ${nm()}! «${SONGS[nx].n}»` : 'Vaaale… pero es la última, ¿eh?', { pri: 4, dur: 5 }); done('cancion'); sfx('cheer'); }
@@ -1963,7 +2133,7 @@ HOOK.move = (dt, I) => { const mv = Math.abs(I.x) + Math.abs(I.z) > 0.25;
     P.vel.set(0, 0, 0); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: sp, grounded: true }); if (PL.q === 0 && d < 0.1 && !drkOpen && !Q_.srv && !PL.drink) openBar(false); return true; }
   if (mv && PL.dance) PL.dance = false; return false; };
 HOOK.after = dt => { stoolContact(dt); if (ticketMesh.visible && Math.hypot(P.pos.x - ticketMesh.position.x, P.pos.z - ticketMesh.position.z) < 0.6) { ticketMesh.visible = false; N.ticket.lost = false; done('ticket'); N.done.delete('ticket'); evt('🎟 ¡Ticket recuperado!', 2.4); say(ant, '¡Mi ticket! Ozú, qué susto.', { pri: 3, cls: 'me' }); updInv(); } };
-HOOK.upd = dt => { updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC]) updW(w, dt); if (VANE) updW(VANE, dt);
+HOOK.upd = dt => { if (danceAllT > 0) danceAllT -= dt; updAmb(dt); updGreeter(dt); updMatch(dt); updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC]) updW(w, dt); if (VANE) updW(VANE, dt);
   if (PL.dance && !PL.stool && STATE === 'play') ant.userData.update(dt * 0.001, { speed: 0, grounded: true, dance: true });
   if (PL.sipT > 0) { PL.sipT -= dt; const a = ant.userData.arms[1]; const k = Math.sin(Math.min(1, (1 - PL.sipT) / 1) * Math.PI); a.rotation.x = -2.3 * k; a.rotation.z = -0.35 * k; }
   if (drkOpen && (Math.hypot(P.pos.x - drkOpen.x, P.pos.z - (-6.8)) > 1.8 || P.pos.z > -5.0) && PL.q < 0) closeBar();
@@ -1974,25 +2144,25 @@ HOOK.ground = (x, z, g) => PL.stool ? PL.stool.h + 0.08 : g;
 const hud = {}; function updHUD() { const c = hhmm(N.gm); if (c !== hud.c) { hud.c = c; $('clk').firstChild.textContent = c; } const ph = phaseName(N.gm); if (ph !== hud.ph) { hud.ph = ph; $('phase').textContent = ph; }
   const f = Math.min(100, N.fama / 1.2), e = N.exp; if (Math.abs(f - (hud.f || -1)) > 0.4) { hud.f = f; $('bFama').firstChild.style.width = f + '%'; } if (Math.abs(e - (hud.e || -1)) > 0.4) { hud.e = e; $('bExp').firstChild.style.width = e + '%'; $('bExp').classList.toggle('hot', e > 66); } }
 // ---------- empezar / reiniciar la noche ----------
-function resetNight() { clearBubs(); closeBar(); dropDrink(); PL.stool = null; PL.q = -1; PL.dance = false; PL.req = []; PL.stoolFama = 0; Object.assign(N, { on: false, t: 0, gm: 0, fama: 0, exp: 0, tasks: [], done: new Set(), closing: new Set(), fresh: new Set(), stats: { drinks: 0, stools: 0, queue: 0, skips: 0, tasks: 0 }, ticket: null, jacket: true, ended: false, done_: false, live: false, greet: 0, given: 0, greeted: new Set(), danceT: 0, onTime: false });
+function resetNight() { closeReq(); closePhone(); slomo.on = false; if (SPOT) { SPOT.visible = false; SPOT.pl.intensity = 0; } TIN.w = null; TIN.matched = false; TIN.cards = []; greeter.busy = false; greeter.next = 28; if (COOL) { COOL.n.visible = false; COOL.path = []; } ambT = 5; clearBubs(); closeBar(); dropDrink(); PL.stool = null; PL.q = -1; PL.dance = false; PL.req = []; PL.stoolFama = 0; Object.assign(N, { on: false, t: 0, gm: 0, fama: 0, exp: 0, tasks: [], done: new Set(), closing: new Set(), fresh: new Set(), stats: { drinks: 0, stools: 0, queue: 0, skips: 0, tasks: 0 }, ticket: null, jacket: true, ended: false, done_: false, live: false, greet: 0, given: 0, greeted: new Set(), danceT: 0, onTime: false });
   ticketMesh.visible = false; STO.forEach((s, i) => { s.st = 'up'; s.ang = 0; s.wob = 0; s.wobA = 0; s.push = 0; s.c[4] = s.h + 0.08; W.STOOLM.set(i); });
   for (const n of NPCS) { if (n.userData.bot) { n.userData.bot.parent.remove(n.userData.bot); n.userData.bot = null; } }
   Q_.line.length = 0; Q_.srv = null; Q_.serveT = 3; XQ.forEach((w, i) => { w.away = 0; if (w.bottle) { w.bottle.parent.remove(w.bottle); w.bottle = null; } w.path = []; w.n.position.set(0.4 + i * 1.6, 0, -3.2 - i * 0.3); w.face = 0; });
   BAND.forEach((w, i) => { w.n.visible = false; w.path = []; w.dance = false; }); }
 HOOK.start = () => { if (EXPLORE) { document.body.classList.remove('juego'); return; } resetNight(); N.on = true; document.body.classList.add('juego'); N.onTime = Math.random() < 0.08 || Q.get('puntual') === '1'; if (N.onTime) { TL.cs = 62; TL.ce = 160; TL.bis = 172; TL.bisE = 192; BAND.forEach((w, i) => { const [x, z, f] = BAND_SPOT[i]; w.n.visible = true; w.n.position.set(x, 0.6, z); w.y = 0.6; w.face = f; }); } else Object.assign(TL, { cs: 150, ce: 250, bis: 262, bisE: 282 });
-  P.pos.set(1.75, 0, 6.2); P.yaw = Math.PI; P.vel.set(0, 0, 0); cam.yaw = 0; refill(); renderTasks(); updInv(); evt('🌙 22:00 · Abren las puertas del Hangar', 3); updHUD(); };
+  P.pos.set(1.75, 0, 6.2); P.yaw = Math.PI; P.vel.set(0, 0, 0); cam.yaw = 0; refill(); renderTasks(); updInv(); pickTheme(); evt('🌙 22:00 · ' + THEME.tag + ' en el Hangar', 3.2); setTimeout(() => say(alv, THEME.line, { pri: 3, dur: 4.8 }), 1200); updHUD(); };
 $('again').addEventListener('click', () => { $('end').classList.remove('on'); $('hud').classList.add('on'); STATE = 'play'; HOOK.start(); });
 $('change').addEventListener('click', () => { $('end').classList.remove('on'); $('menu').classList.add('on'); STATE = 'menu'; document.body.classList.remove('juego'); resetNight(); });
-window.NOCHE = { N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
+window.NOCHE = { openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
 
 // menú de entrada
 function choose(i) { selIdx = i; ant = PJ[i]; antCfg = ROSTER[i]; if (!EXPLORE) store.set('hangar_pj', i); placeNPCs(); retag(); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.visible = true; }
-if (!EXPLORE) { // retratos de la pandilla para la selección (como en La Curva)
+const PORTRAITS = []; if (!EXPLORE) { // retratos de la pandilla para la selección (como en La Curva)
   const ps = new THREE.Scene(); ps.environment = scene.environment; ps.background = new THREE.Color('#2a2440'); ps.add(new THREE.HemisphereLight('#ffffff', '#5a5040', 1.3)); const dl = new THREE.DirectionalLight('#fff2dc', 2.6); dl.position.set(1.8, 3, 4); ps.add(dl); const rl = new THREE.DirectionalLight('#c08fff', 1.4); rl.position.set(-3, 2, -2); ps.add(rl);
   const pc = new THREE.PerspectiveCamera(28, 4 / 5, 0.1, 30), PW = 240, PH = 300, dpr = renderer.getPixelRatio(); renderer.setPixelRatio(1); renderer.setSize(PW, PH, false);
   const oc = document.createElement('canvas'); oc.width = PW; oc.height = PH; const ox = oc.getContext('2d'); const grid = $('grid');
   PJ.forEach((n, i) => { const op = n.position.clone(), orr = n.rotation.y; ps.add(n); n.position.set(0, 0, 0); n.rotation.set(0, 0.32, 0); n.userData.update(0.016, { speed: 0, grounded: true }); const h = n.userData.height * n.scale.y; pc.position.set(0.18, h * 0.66, 3.0); pc.lookAt(0, h * 0.64, 0);
-    renderer.render(ps, pc); ox.clearRect(0, 0, PW, PH); ox.drawImage(renderer.domElement, 0, 0, PW, PH); const url = oc.toDataURL('image/jpeg', 0.86); scene.add(n); n.position.copy(op); n.rotation.set(0, orr, 0);
+    renderer.render(ps, pc); ox.clearRect(0, 0, PW, PH); ox.drawImage(renderer.domElement, 0, 0, PW, PH); const url = oc.toDataURL('image/jpeg', 0.86); PORTRAITS.push(url); scene.add(n); n.position.copy(op); n.rotation.set(0, orr, 0);
     const c = document.createElement('div'); c.className = 'card' + (i === selIdx ? ' sel' : ''); c.innerHTML = `<img alt="" src="${url}"><b>${ROSTER[i].name}</b>`; c.onclick = () => { selIdx = i; [...grid.children].forEach((e, k) => e.classList.toggle('sel', k === i)); startAudio(); }; c.ondblclick = () => enter(); grid.appendChild(c); });
   renderer.setPixelRatio(dpr); renderer.setSize(innerWidth, innerHeight); fitView(); }
 function enter() { startAudio(); choose(selIdx); STATE = 'play'; $('menu').classList.remove('on'); $('hud').classList.add('on'); if (HOOK.start) HOOK.start(); }
