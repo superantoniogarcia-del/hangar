@@ -890,7 +890,8 @@ const stick = textTex(512, 256, (x, w, h) => { x.fillStyle = '#18181c'; x.fillRe
 BC(...[P.columna[0], 0, P.columna[1], P.columna[2], H, P.columna[3]], M.black);
 // pilares interiores forrados (paneles grises en marco negro) junto a la cristalera y a la barra
 function panelPillar(x, z, s = 0.6) { BC(x - s / 2, 0, z - s / 2, x + s / 2, H, z + s / 2, M.frame); for (const [nx, nz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) for (let j = 0; j < 4; j++) for (let k = 0; k < 2; k++) { const w = s / 2 - 0.05, hh = H / 4 - 0.07; const px = x + nx * (s / 2 + 0.005) + (nz ? (k - 0.5) * (s / 2) : 0), pz = z + nz * (s / 2 + 0.005) + (nx ? (k - 0.5) * (s / 2) : 0); PL(w, hh, M.panel, px, j * H / 4 + H / 8, pz, nx ? nx * Math.PI / 2 : (nz < 0 ? Math.PI : 0)); } }
-// (el plano solo tiene una columna: no se añaden pilares inventados)
+// segunda columna (indicada por Antonio): igual que la primera, misma distancia a la barra, bajo la 9ª y última lámpara (x 5.2), antes del escenario
+{ const cw = P.columna[2] - P.columna[0], cx = 5.2; BC(cx - cw / 2, 0, P.columna[1], cx + cw / 2, H, P.columna[3], M.black); }
 // --- barra (~11 m): frente de tablas lila/azul, encimera de madera clara
 { const [x0, z0, x1, z1] = P.barra, xa = x0 + 2.0; col(x0, z0, x1, z1); B(xa, 0, z0 + 0.1, x1, 1.0, z1, M.boards); B(xa, 1.0, z0, x1, 1.06, z1 + 0.08, M.wood); B(xa, 0, z1 - 0.02, x1, 0.12, z1 + 0.02, M.black);
   // tramo izquierdo rebajado accesible (~0.80 m) con hueco libre para las rodillas en el lado del cliente
@@ -1000,14 +1001,17 @@ const MARQ = (() => { const [sx0, sx1] = P.crisDer, SZ = FZ + 0.2;
   const slT = textTex(64, 256, (x, w, h) => { x.fillStyle = '#16161a'; x.fillRect(0, 0, w, h); for (let y = 0; y < h; y += 16) { x.fillStyle = '#2a2a30'; x.fillRect(0, y, w, 9); x.fillStyle = '#0a0a0c'; x.fillRect(0, y + 13, w, 3); } }); slT.wrapS = slT.wrapT = THREE.RepeatWrapping; slT.repeat.set((sx1 - sx0) * 2, 1.6 / 1.6 * 3);
   { const m = new THREE.Mesh(new THREE.PlaneGeometry(sx1 - sx0 + 0.3, 1.6), new THREE.MeshStandardMaterial({ map: slT, roughness: 0.55, metalness: 0.3 })); m.position.set((sx0 + sx1) / 2, 3.8, SZ - 0.02); scene.add(m); }
   const arc = (cx, cy, rx, ry, a0, a1, n) => { const o = []; for (let i = 0; i <= n; i++) { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; o.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return o; };
-  const L = { H: [[[0, 0], [0, 1]], [[0.66, 0], [0.66, 1]], [[0, 0.5], [0.66, 0.5]]], A: [[[0, 0], [0.34, 1], [0.68, 0]], [[0.16, 0.38], [0.52, 0.38]]], N: [[[0, 0], [0, 1], [0.66, 0], [0.66, 1]]],
-    G: [arc(0.35, 0.5, 0.35, 0.5, 45, 360, 12), [[0.38, 0.46], [0.7, 0.46]]], R: [[[0, 0], [0, 1], [0.36, 1]].concat(arc(0.36, 0.75, 0.27, 0.25, 90, -90, 8)).concat([[0, 0.5]]), [[0.3, 0.5], [0.7, 0]]] };
-  const LH = 1.0, SW = 0.15, DEP = 0.12, gap = 0.26, word = 'HANGAR', wid = c => c === 'G' || c === 'R' ? 0.7 : c === 'A' ? 0.68 : 0.66;
+  const L = { H: [[[0, 0], [0, 1]], [[0.72, 0], [0.72, 1]], [[0, 0.5], [0.72, 0.5]]], A: [[[0, 0], [0.38, 1], [0.76, 0]], [[0.17, 0.42], [0.59, 0.42]]], N: [[[0, 0], [0, 1], [0.72, 0], [0.72, 1]]],
+    G: [arc(0.37, 0.5, 0.37, 0.5, 40, 360, 28), [[0.42, 0.5], [0.74, 0.5]]], R: [[[0, 0], [0, 1], [0.42, 1]].concat(arc(0.42, 0.75, 0.27, 0.25, 90, -90, 16)).concat([[0, 0.5]]), [[0.36, 0.5], [0.74, 0]]] };
+  const LH = 1.0, SW = 0.17, DEP = 0.12, gap = 0.22, word = 'HANGAR', wid = c => ({ H: 0.72, A: 0.76, N: 0.72, G: 0.74, R: 0.74 })[c];
   const tot = [...word].reduce((a, c) => a + wid(c) * LH, 0) + gap * 5; let cx = (sx0 + sx1) / 2 - tot / 2; const geos = [], bulbs = [], halos = [];
-  [...word].forEach((c, i) => { const y0 = 3.06 + i * 0.065, x0 = cx; halos.push([x0 + wid(c) * LH / 2, y0 + LH / 2]);
-    for (const pl of L[c]) for (let k = 0; k < pl.length - 1; k++) { const ax = x0 + pl[k][0] * LH, ay = y0 + pl[k][1] * LH, bx = x0 + pl[k + 1][0] * LH, by = y0 + pl[k + 1][1] * LH, len = Math.hypot(bx - ax, by - ay);
-      const g = new THREE.BoxGeometry(len + SW * 0.85, SW, DEP); g.rotateZ(Math.atan2(by - ay, bx - ax)); g.translate((ax + bx) / 2, (ay + by) / 2, SZ + DEP / 2); geos.push(g);
-      const step = LITE ? 0.17 : 0.105, nb = Math.max(1, Math.round(len / step)); for (let j = (k === 0 ? 0 : 1); j <= nb; j++) bulbs.push([ax + (bx - ax) * j / nb, ay + (by - ay) * j / nb]); }
+  const step = LITE ? 0.16 : 0.1, near = (x, y) => bulbs.some(b => Math.hypot(b[0] - x, b[1] - y) < step * 0.6);
+  [...word].forEach((c, i) => { const y0 = 3.06 + i * 0.06, x0 = cx; halos.push([x0 + wid(c) * LH / 2, y0 + LH / 2]); // letras rectas, sin giro; la base sube en línea recta
+    for (const pl of L[c]) { const pts = pl.map(q => [x0 + q[0] * LH, y0 + q[1] * LH]); let tl = 0; const segs = [];
+      for (let k = 0; k < pts.length - 1; k++) { const [ax, ay] = pts[k], [bx, by] = pts[k + 1], len = Math.hypot(bx - ax, by - ay); segs.push([ax, ay, bx, by, len, tl]); tl += len;
+        const g = new THREE.BoxGeometry(len, SW, DEP); g.rotateZ(Math.atan2(by - ay, bx - ax)); g.translate((ax + bx) / 2, (ay + by) / 2, SZ + DEP / 2); geos.push(g); }
+      for (const [px, py] of pts) { const j = new THREE.CylinderGeometry(SW / 2, SW / 2, DEP, 16); j.rotateX(Math.PI / 2); j.translate(px, py, SZ + DEP / 2); geos.push(j); } // uniones redondeadas, trazo limpio
+      const nb = Math.max(1, Math.round(tl / step)); for (let j = 0; j <= nb; j++) { const d = tl * j / nb; const sg = segs.find(sg => d <= sg[5] + sg[4] + 1e-6) || segs[segs.length - 1]; const f = sg[4] ? (d - sg[5]) / sg[4] : 0; const x = sg[0] + (sg[2] - sg[0]) * f, y = sg[1] + (sg[3] - sg[1]) * f; if (!near(x, y)) bulbs.push([x, y]); } }
     cx += wid(c) * LH + gap; });
   const bodyM = std({ color: '#e9cf98', emissive: '#c08a3c', emissiveIntensity: 0.55, roughness: 0.45, metalness: 0.15 });
   for (const g of geos) addG(g, bodyM);
