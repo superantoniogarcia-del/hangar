@@ -5580,7 +5580,7 @@ addEventListener('resize', fitView); fitView();
 // ---------- música indie-rock (WebAudio procedural, original) ----------
 let AN = null, AC = null, master = null, lp = null, gtr = null; let BPM = 124, BEAT = 60 / BPM, ST8 = BEAT / 2, fx = null; let nextStep = 0, stepN = 0, beatN = 0, T0 = 0; let MUTE = Q.has('mute');
 // música INDIE-POP/ROCK procedural (4 canciones originales en rotación): batería en directo, bajo a corcheas, guitarras jangle con chorus + power chords saturados, melodía "voz" coreable
-function startAudio() { if (AC || MUTE) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 18000; master = AC.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(AC.destination); AN = AC.createAnalyser(); AN.fftSize = 2048; lp.connect(AN);
+function startAudio() { if (AC) { if (AC.state === 'suspended') AC.resume().catch(() => {}); return; } if (MUTE) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 18000; master = AC.createGain(); master.gain.value = 0; master.connect(lp); lp.connect(AC.destination); AN = AC.createAnalyser(); AN.fftSize = 2048; lp.connect(AN);
   const ws = AC.createWaveShaper(), cu = new Float32Array(512); for (let i = 0; i < 512; i++) { const x = i / 255.5 - 1; cu[i] = Math.tanh(x * 3.2); } ws.curve = cu; const gl = AC.createBiquadFilter(); gl.type = 'lowpass'; gl.frequency.value = 3200; gtr = AC.createGain(); gtr.gain.value = 0.5; gtr.connect(ws); ws.connect(gl); gl.connect(master);
   if (!LITE) { fx = AC.createGain(); fx.gain.value = 1; const dl = AC.createDelay(1), fb = AC.createGain(), fl = AC.createBiquadFilter(), wet = AC.createGain(); dl.delayTime.value = 0.27; fb.gain.value = 0.32; fl.type = 'lowpass'; fl.frequency.value = 2600; wet.gain.value = 0.35; fx.connect(dl); dl.connect(fl); fl.connect(fb); fb.connect(dl); fl.connect(wet); wet.connect(master); }
   nextStep = T0 = AC.currentTime + 0.1; songI = ((Math.random() * SONGS.length) | 0) - 1; $('hint').classList.add('off'); } catch (_) {} }
@@ -6687,11 +6687,21 @@ function enter() { startAudio(); choose(selIdx); STATE = 'play'; $('menu').class
 $('go').addEventListener('click', e => { e.preventDefault(); enter(); });
 if (EXPLORE) document.body.classList.add('explorar');
 if (TEST) { $('menu').classList.remove('on'); $('hud').classList.add('on'); $('hint').classList.add('off'); if (HOOK.start) HOOK.start(); }
-const FROM_CURVA = Q.get('desde') === 'curva';
-if (FROM_CURVA && !TEST) { STATE = 'play'; $('menu').classList.remove('on'); $('hud').classList.add('on'); if (HOOK.start) HOOK.start(); P.pos.set(-7.2, 0, -7.5); P.yaw = Math.PI / 2; cam.yaw = -Math.PI / 2; cam.target.copy(P.pos).add(V3(0, 1.25, 0)); ant.position.copy(P.pos); ant.rotation.y = P.yaw; updCam(0.016); flash(); setTimeout(() => { evt('🌀 ¡Has aterrizado desde el WC de La Curva!', 3.8); say(ant, '¡Ozú, qué viaje astral! ¡He salido por el baño del Hangar!', { pri: 5, cls: 'me', dur: 5 }); }, 300); }
-else if (FROM_CURVA && TEST) { P.pos.set(-7.2, 0, -7.5); P.yaw = Math.PI / 2; ant.position.copy(P.pos); }
+const FROM_CURVA = Q.get('desde') === 'curva' || Q.has('autostart');
 // precompila y arranca
-renderer.compile(scene, camera); $('load').classList.remove('on'); if (!TEST) $('menu').classList.add('on');
+renderer.compile(scene, camera); $('load').classList.remove('on');
+if (FROM_CURVA && !TEST) {
+  enter();
+  P.pos.set(-7.2, 0, -7.5); P.yaw = Math.PI / 2; cam.yaw = -Math.PI / 2; cam.effPitch = cam.pitch;
+  cam.target.copy(P.pos).add(V3(0, 1.25, 0)); ant.position.copy(P.pos); ant.rotation.y = P.yaw;
+  updCam(0.016); updOccluders(0.2); flash();
+  setTimeout(() => { evt('🌀 ¡Has aterrizado desde el WC de La Curva!', 3.8); say(ant, '¡Ozú, qué viaje astral! ¡He salido por el baño del Hangar!', { pri: 5, cls: 'me', dur: 5 }); }, 300);
+} else if (FROM_CURVA && TEST) {
+  choose(selIdx); P.pos.set(-7.2, 0, -7.5); P.yaw = Math.PI / 2; cam.yaw = -Math.PI / 2; cam.effPitch = cam.pitch;
+  cam.target.copy(P.pos).add(V3(0, 1.25, 0)); ant.position.copy(P.pos); ant.rotation.y = P.yaw; updCam(0.016);
+} else if (!TEST) {
+  $('menu').classList.add('on');
+}
 loop();
 // ---------- API de pruebas ----------
 window.GAME = { P, cam, W, get ant() { return ant; }, PJ, NPCS, STAFF, MODE, collide, useStairs, selIdx: () => selIdx, choose(i) { choose(i); }, alv, camera, renderer,
