@@ -1160,7 +1160,22 @@ const B = (x0, y0, z0, x1, y1, z1, mat) => (addG(new THREE.BoxGeometry(Math.abs(
 const BC = (x0, y0, z0, x1, y1, z1, mat) => { col(x0, z0, x1, z1, Math.max(y0, y1)); return B(x0, y0, z0, x1, y1, z1, mat); };
 const CYL = (r, h, mat, x, y, z, seg = 12, r2) => addG(new THREE.CylinderGeometry(r2 != null ? r2 : r, r, h, seg), mat, x, y + h / 2, z);
 const PL = (w, h, mat, x, y, z, ry = 0, rx = 0) => addG(new THREE.PlaneGeometry(w, h), mat, x, y, z, ry, rx);
-function bakeStatic(groupFor) { for (const [mat, list] of STATIC) { for (const g of list) { g.computeBoundingBox(); const bb = g.boundingBox; CAMB.push([bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z]); } const g = mergeUV(list); const m = new THREE.Mesh(g, mat); m.userData.baked = true; m.matrixAutoUpdate = false; m.receiveShadow = !LITE; (groupFor(mat) || scene).add(m); } STATIC.clear(); }
+function bakeStatic(groupFor) {
+  for (const [mat, list] of STATIC) {
+    const g = mergeUV(list); const m = new THREE.Mesh(g, mat); m.userData.baked = true; m.matrixAutoUpdate = false; m.receiveShadow = !LITE; (groupFor(mat) || scene).add(m);
+  }
+  STATIC.clear();
+  // En CAMB sólo entran los muros perimetrales grandes (nunca columnas interiores, biombo, lámparas, muebles ni PNJ)
+  CAMB.length = 0;
+  CAMB.push(
+    [-11.6, 0, ZB - 0.3, 11.6, H + 0.3, ZB + 0.05],       // muro de fondo
+    [XR - 0.05, 0, ZB, XR + 1.0, H + 0.3, 0.3],           // muro derecho (tras escenario)
+    [6.81, 0, -10.56, 11.44, H, -7.34],                   // bloque almacén/backstage
+    [-6.8, 0, ZE, -6.52, H, 0.1],                         // pared izquierda junto a cabina
+    [XL - 0.3, 0, ZB, XL + 0.04, H, ZE],                  // pared izquierda baños
+    [XL, 0, ZE - 0.15, -6.56, H, ZE + 0.15]               // pared sur bajo baño chicas/guardarropa
+  );
+}
 function mergeUV(list) { let nv = 0, ni = 0; for (const g of list) { nv += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; }
   const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), UV = new Float32Array(nv * 2), I = new Uint32Array(ni); let vo = 0, io = 0;
   for (const g of list) { const p = g.attributes.position.array, n = g.attributes.normal.array, uv = g.attributes.uv ? g.attributes.uv.array : null, c = g.attributes.position.count; P.set(p, vo * 3); N.set(n, vo * 3); if (uv) UV.set(uv, vo * 2);
@@ -1837,7 +1852,7 @@ const NPC_R = 1.12; // separación dura cabeza-cabeza entre dos personajes Pop (
 function pushNPC(p) {
   const list = window.ALL_CHARS ? window.ALL_CHARS() : NPCS;
   const fixed = window.IS_FIXED_CHAR || (n => (n.position.y || 0) > 0.25);
-  for (let it = 0; it < 4; it++) {
+  for (let it = 0; it < 2; it++) {
     for (const n of list) {
       if (!n || !n.visible || n === ant || Math.abs((p.y || 0) - (n.position.y || 0)) > 1.2) continue;
       const minD = (ant.userData.rad || 0.56) + (n.userData.rad || 0.56);
@@ -1845,32 +1860,28 @@ function pushNPC(p) {
       if (d2 >= minD * minD || d2 < 1e-9) continue;
       const d = Math.sqrt(d2), pen = minD - d, ux = dx / d, uz = dz / d;
       if (fixed(n)) {
-        // personaje fijo tras mostrador o en escenario: el jugador rodea
         p.x -= ux * pen; p.z -= uz * pen;
         continue;
       }
-      // personaje móvil: el jugador lo EMPUJA y lo aparta hacia delante y a un lado para poder pasar siempre
-      const vx = P.vel.x, vz = P.vel.z;
-      const cross = vx * uz - vz * ux;
-      const side = Math.abs(cross) > 0.05 ? Math.sign(cross) : ((n.id & 1) ? 1 : -1);
-      const tx = -uz * side, tz = ux * side;
-      n.position.x += ux * (pen * 0.88) + tx * (pen * 0.38);
-      n.position.z += uz * (pen * 0.88) + tz * (pen * 0.38);
-      p.x -= ux * (pen * 0.12);
-      p.z -= uz * (pen * 0.12);
+      // fijar el sentido lateral de apartarse durante 1,2 s para que nunca tiemble izq/der
+      if (!n.userData.pushSide || T - (n.userData.pushT || -9) > 1.2) {
+        const cross = P.vel.x * uz - P.vel.z * ux;
+        n.userData.pushSide = Math.abs(cross) > 0.08 ? Math.sign(cross) : ((n.id & 1) ? 1 : -1);
+      }
+      n.userData.pushT = T;
+      const side = n.userData.pushSide, tx = -uz * side, tz = ux * side;
+      // el PNJ se aparta el 100 % de la penetración más un deslizamiento lateral suave (el jugador avanza fluido y sin solaparse)
+      n.position.x += ux * (pen * 1.02) + tx * (pen * 0.36);
+      n.position.z += uz * (pen * 1.02) + tz * (pen * 0.36);
       collide(n.position, n.userData.rad || 0.56, false);
-      // si el PNJ ha tocado pared/columna/mesa, deslizarlo lateralmente y garantizar distancia >= minD
       const dx2 = n.position.x - p.x, dz2 = n.position.z - p.z, d2b = dx2 * dx2 + dz2 * dz2;
       if (d2b < minD * minD && d2b > 1e-9) {
         const db = Math.sqrt(d2b), rem = minD - db, ux2 = dx2 / db, uz2 = dz2 / db;
-        n.position.x += -uz2 * side * rem * 0.75 + ux2 * rem * 0.65;
-        n.position.z += ux2 * side * rem * 0.75 + uz2 * rem * 0.65;
+        n.position.x += -uz2 * side * rem * 1.05 + ux2 * rem * 0.95;
+        n.position.z += ux2 * side * rem * 1.05 + uz2 * rem * 0.95;
         collide(n.position, n.userData.rad || 0.56, false);
-        const dx3 = n.position.x - p.x, dz3 = n.position.z - p.z, d3 = Math.hypot(dx3, dz3) || 1;
-        if (d3 < minD) { p.x = n.position.x - (dx3 / d3) * minD; p.z = n.position.z - (dz3 / d3) * minD; }
       }
     }
-    if (window.NOCHE && NOCHE.sepAllChars) NOCHE.sepAllChars(1);
   }
 }
 placeNPCs();
@@ -2004,19 +2015,41 @@ function stepPlayer(dt) {
   if (HOOK.after) HOOK.after(dt); { const gy = P.pos.y > 2.0 ? 2.72 : (HOOK.ground ? HOOK.ground(P.pos.x, P.pos.z, groundAt(P.pos.x, P.pos.z)) : groundAt(P.pos.x, P.pos.z)); P.pos.y = gy > P.pos.y ? Math.min(gy, P.pos.y + dt * 5) : Math.max(gy, P.pos.y - dt * 6); }
   ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: Math.hypot(P.vel.x, P.vel.z) / 2.4, grounded: true, dance: !!(window.NOCHE && NOCHE.PL && NOCHE.PL.dance), turn: clamp(P.turn || 0, -6, 6) * 0.1 }); }
 // ---------- cámara (seguimiento + brazo con colisión; sin ocultar geometría) ----------
-const cam = { yaw: 0, pitch: 0.32, target: V3() }; let camDist = TOUCH && innerHeight > innerWidth ? 6.4 : 5.6, camMode = 'follow', camFix = null;
-cam.yaw = P.yaw + Math.PI; cam.target.copy(P.pos).add(V3(0, 1.2, 0));
-function updCam(dt) { if (camMode !== 'follow') return; const tgt = P.pos.clone().add(V3(0, 1.25, 0)); cam.target.lerp(tgt, Math.min(1, dt * 8));
-  const spd = Math.hypot(P.vel.x, P.vel.z); if (spd > 0.4 && T - lastManual > 1.6) cam.yaw += angDiff(cam.yaw, P.yaw + Math.PI) * Math.min(1, dt * 0.9 * spd / 2.4);
-  const ins = inside(P.pos); const dist = camDist * (ins ? 1 : 1.15); const dir = V3(Math.sin(cam.yaw) * Math.cos(cam.pitch), Math.sin(cam.pitch), Math.cos(cam.yaw) * Math.cos(cam.pitch));
-  // brazo de cámara con esfera (radio CR) contra TODA la geometría sólida: nunca dentro de un objeto; si queda muy cerca, sólo se oculta el propio avatar
-  armPrep(cam.target, dist); let hit = armCast(cam.target, dir, dist); if (hit < dist * 0.8) { const k = clamp(1 - hit / dist, 0, 1), pt = Math.min(1.2, cam.pitch + 0.7 * k); const d2 = V3(Math.sin(cam.yaw) * Math.cos(pt), Math.sin(pt), Math.cos(cam.yaw) * Math.cos(pt)); const h2 = armCast(cam.target, d2, dist); if (h2 > hit) { dir.copy(d2); hit = h2; } }
-  const want = Math.min(dist, hit); armLen = want < armLen ? want : armLen + (want - armLen) * Math.min(1, dt * 2.5); armLen = Math.min(armLen, hit);
-  camera.position.copy(cam.target).addScaledVector(dir, armLen); ant.visible = armLen > 0.75; if (camera.near !== 0.05) { camera.near = 0.05; camera.updateProjectionMatrix(); } camera.lookAt(cam.target); }
-const CR = 0.3; let armLen = 5, ARMB = null, NEAR = [], D0 = [];
-function buildArm() { ARMB = W.CAMB.concat([[-11.6, W.H - 0.02, -10.7, 11.6, W.H + 3, 0.1], [-60, W.PORT_H - 0.05, -1, 12.8, W.PORT_H + 60, 4.4], [-11.6, W.H - 0.62, -10.7, -6.56, W.H, W.P.banoChicas[3]], [-200, -5, -200, 200, 0.0, 200]]);
-  const skip = new Set(); for (const o of [...PJ, alv, ...STAFF.map(s => s.n), ...(window.NOCHE && NOCHE.MOTO ? NOCHE.MOTO.map(m => m.g) : [])]) o.traverse(m => skip.add(m)); for (const c of W.CARS) c.g.traverse(m => skip.add(m)); const bb = new THREE.Box3();
-  W.scene.updateMatrixWorld(true); W.scene.traverse(m => { if (!m.isMesh || m.isInstancedMesh || m.userData.noCam || skip.has(m) || m.userData.baked) return; const mt = m.material; if (!mt || mt.blending === THREE.AdditiveBlending || mt.side === THREE.BackSide) return; bb.setFromObject(m); const sz = bb.getSize(V3()); if (sz.x > 60 || sz.z > 60 || sz.y > 60) return; ARMB.push([bb.min.x, bb.min.y, bb.min.z, bb.max.x, bb.max.y, bb.max.z]); }); }
+const cam = { yaw: 0, pitch: 0.32, effPitch: 0.32, mul: 1.0, target: V3() }; let camDist = TOUCH && innerHeight > innerWidth ? 6.4 : 5.6, camMode = 'follow', camFix = null;
+cam.yaw = P.yaw + Math.PI; cam.target.copy(P.pos).add(V3(0, 1.25, 0));
+function updCam(dt) {
+  if (camMode !== 'follow') return;
+  const tgt = P.pos.clone().add(V3(0, 1.25, 0));
+  cam.target.lerp(tgt, Math.min(1, dt * 12));
+  const spd = Math.hypot(P.vel.x, P.vel.z);
+  if (spd > 0.4 && T - lastManual > 1.6) cam.yaw += angDiff(cam.yaw, P.yaw + Math.PI) * Math.min(1, dt * 0.9 * spd / 2.4);
+  const ins = inside(P.pos);
+  cam.mul += ((ins ? 1.0 : 1.15) - cam.mul) * Math.min(1, dt * 3.5);
+  const dist = camDist * cam.mul;
+  // inclinación y brazo 100 % continuos y amortiguados (cero saltos bruscos de ángulo o distancia)
+  const wantPitch = clamp(cam.pitch + 0.26 * clamp(1 - armLen / dist, 0, 1), 0.08, 1.15);
+  cam.effPitch += (wantPitch - cam.effPitch) * Math.min(1, dt * 6);
+  const dir = V3(Math.sin(cam.yaw) * Math.cos(cam.effPitch), Math.sin(cam.effPitch), Math.cos(cam.yaw) * Math.cos(cam.effPitch));
+  armPrep(cam.target, dist);
+  const hit = armCast(cam.target, dir, dist);
+  const want = Math.max(0.65, Math.min(dist, hit));
+  const maxArmStep = (want < armLen ? 2.6 : 2.0) * dt;
+  armLen += clamp(want - armLen, -maxArmStep, maxArmStep);
+  camera.position.copy(cam.target).addScaledVector(dir, armLen);
+  if (!(window.EXP && EXP.driving)) ant.visible = armLen > 0.72;
+  if (camera.near !== 0.05) { camera.near = 0.05; camera.updateProjectionMatrix(); }
+  camera.lookAt(cam.target);
+}
+const CR = 0.28; let armLen = 5, ARMB = null, NEAR = [], D0 = [];
+function buildArm() {
+  // Sólo muros perimetrales, techos, pórtico y suelo (sin columnas interiores, biombo, muebles ni personajes)
+  ARMB = W.CAMB.concat([
+    [-11.6, W.H - 0.02, -10.7, 11.6, W.H + 3, 0.1],
+    [-60, W.PORT_H - 0.05, -1, 12.8, W.PORT_H + 60, 4.4],
+    [-11.6, W.H - 0.62, -10.7, -6.56, W.H, W.P.banoChicas[3]],
+    [-2000, -5, -2000, 2000, 0.0, 2000]
+  ]);
+}
 const boxDist = (b, x, y, z) => { const dx = Math.max(b[0] - x, 0, x - b[3]), dy = Math.max(b[1] - y, 0, y - b[4]), dz = Math.max(b[2] - z, 0, z - b[5]); return Math.sqrt(dx * dx + dy * dy + dz * dz); };
 function armPrep(o, max) { if (!ARMB) buildArm(); NEAR.length = 0; D0.length = 0; for (const b of ARMB) { const d = boxDist(b, o.x, o.y, o.z); if (d < max + CR + 0.2) { NEAR.push(b); D0.push(d); } } }
 const SB = [], SD = []; function armCast(o, d, max) { const ex = o.x + d.x * max, ey = o.y + d.y * max, ez = o.z + d.z * max, m = CR + 0.05; const lx = Math.min(o.x, ex) - m, hx = Math.max(o.x, ex) + m, ly = Math.min(o.y, ey) - m, hy = Math.max(o.y, ey) + m, lz = Math.min(o.z, ez) - m, hz = Math.max(o.z, ez) + m;
@@ -2108,7 +2141,7 @@ function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = M
   ledT += dt; if (ledT > (LITE ? 0.12 : 0.05)) { drawLED(T); ledT = 0; } }
 // ---------- bucle ----------
 let STATE = TEST ? 'play' : 'menu', topCam = null;
-function update(dt) { if (HOOK.dt) dt = HOOK.dt(dt); T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) if (!n.userData.managed) n.userData.update(dt, { speed: 0, grounded: true, dance: !!(HOOK.npcDance && HOOK.npcDance(n)), wave: !!(n.userData.waveT > 0 && (n.userData.waveT -= dt) > 0) }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
+function update(dt) { if (HOOK.dt) dt = HOOK.dt(dt); T += dt; if (STATE === 'play') stepPlayer(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) if (!n.userData.managed) n.userData.update(dt, { speed: 0, grounded: true, dance: !!(HOOK.npcDance && HOOK.npcDance(n)), wave: !!(n.userData.waveT > 0 && (n.userData.waveT -= dt) > 0) }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updCam(dt); updAudio(); }
 let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); if (!(window.NOCHE && NOCHE.ASTRAL && NOCHE.ASTRAL.on && NOCHE.ASTRAL.t >= 1.1)) renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); if (HOOK.ui) HOOK.ui(dt); } requestAnimationFrame(loop); }
 // ---------- la noche (bucle de juego, barra, guardarropa, baños, taburetes) ----------
 // ===== HANGAR · LA NOCHE (fase 2): 22:00→06:00 en 5 min, FAMA / EXPULSIÓN, encargos, barra sin grifo, guardarropa, baños, taburetes =====
@@ -2152,7 +2185,8 @@ const mkW = (n, x, z, yaw = 0) => { n.position.set(x, 0, z); n.rotation.y = yaw;
 function walkTo(w, pts, done, sp) { w.path = pts.map(p => V3(p[0], 0, p[1])); w.done = done || null; if (sp) w.sp = sp; }
 function updW(w, dt) {
   let s = 0;
-  if (w.path.length) {
+  const pushedRecently = T - (w.n.userData.pushT || -9) < 0.55;
+  if (w.path.length && !pushedRecently) {
     w.wpT = (w.wpT || 0) + dt;
     const t = w.path[0], p = w.n.position, dx = t.x - p.x, dz = t.z - p.z, d = Math.hypot(dx, dz);
     if (d < 0.32 || w.wpT > 6.5) {
@@ -3526,7 +3560,7 @@ loop();
 window.GAME = { P, cam, W, get ant() { return ant; }, PJ, NPCS, STAFF, MODE, collide, useStairs, selIdx: () => selIdx, choose(i) { choose(i); }, alv, camera, renderer,
   step(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); if (!(window.NOCHE && NOCHE.ASTRAL && NOCHE.ASTRAL.on && NOCHE.ASTRAL.t >= 1.1)) renderer.render(scene, topCam || camera); updTags(); if (HOOK.ui) HOOK.ui(1 / 60); },
   sim(n = 1) { for (let i = 0; i < n; i++) update(1 / 60); }, // sin render (pruebas rápidas)
-  setInput(i) { INPUT = i; }, music() { if (!AN) return null; const d = new Float32Array(2048); AN.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { song: song && song.n, bpm: BPM, step: stepN, pk, t: AC.currentTime, st: AC.state }; }, startMusic(i, bar) { startAudio(); if (i != null) { songI = i - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.05; } if (bar) { pickSong(songI + 1, nextStep); stepN = bar * 8; } }, arm() { return armLen; }, camClear, tp(x, z, yaw) { P.pos.set(x, groundAt(x, z), z); if (yaw != null) { P.yaw = yaw; cam.yaw = yaw + Math.PI; } cam.target.copy(P.pos).add(V3(0, 1.25, 0)); collide(P.pos); ant.position.copy(P.pos); ant.rotation.y = P.yaw; },
+  setInput(i) { INPUT = i; }, music() { if (!AN) return null; const d = new Float32Array(2048); AN.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { song: song && song.n, bpm: BPM, step: stepN, pk, t: AC.currentTime, st: AC.state }; }, startMusic(i, bar) { startAudio(); if (i != null) { songI = i - 1; song = null; stepN = 0; nextStep = AC.currentTime + 0.05; } if (bar) { pickSong(songI + 1, nextStep); stepN = bar * 8; } }, arm() { return armLen; }, camClear, tp(x, z, yaw) { P.pos.set(x, groundAt(x, z), z); if (yaw != null) { P.yaw = yaw; cam.yaw = yaw + Math.PI; } cam.target.copy(P.pos).add(V3(0, 1.25, 0)); cam.effPitch = cam.pitch; collide(P.pos); ant.position.copy(P.pos); ant.rotation.y = P.yaw; updCam(0.016); },
   view(px, py, pz, tx, ty, tz, fov) { camMode = 'fixed'; topCam = null; W.CEIL.visible = true; W.BLD.visible = true; W.ROOF.visible = true; camera.position.set(px, py, pz); camera.near = 0.1; camera.fov = fov || camera.fov; camera.updateProjectionMatrix(); camera.lookAt(tx, ty, tz); },
   follow() { camMode = 'follow'; topCam = null; W.CEIL.visible = true; W.BLD.visible = true; W.ROOF.visible = true; fitView(); },
   top() { W.CEIL.visible = false; W.BLD.visible = false; W.ROOF.visible = false; for (const t of TAGS) t.el.remove(); TAGS.length = 0; const a = innerWidth / innerHeight, hw = a > 1 ? 18 : 13, hh = hw / a; topCam = new THREE.OrthographicCamera(-hw, hw, hh, -hh, 1, 200); topCam.position.set(1.5, 80, a > 1 ? -1 : 0); topCam.up.set(0, 0, -1); topCam.lookAt(1.5, 0, a > 1 ? -1 : 0); camMode = 'fixed'; },
