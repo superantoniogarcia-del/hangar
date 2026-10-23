@@ -593,7 +593,7 @@ function makePopCharacter(userCfg) {
     legs[0].rotation.x = lA + I * 0.04 * shift; legs[1].rotation.x = rA - I * 0.04 * shift;
     legs[0].rotation.z = -D * 0.12 * Math.max(0, Math.sin(t * 9)) - I * 0.035 * Math.max(0, shift); legs[1].rotation.z = D * 0.12 * Math.max(0, -Math.sin(t * 9)) + I * 0.035 * Math.max(0, -shift);
     // cuerpo: rebote (doble frecuencia, con caída al apoyar), balanceo lateral, inclinación al correr y respiración
-    const step = Math.abs(Math.sin(ph)); const bob = (step * 0.05 - (1 - step) ** 6 * 0.012) * w + D * Math.abs(Math.sin(t * 9)) * 0.05;
+    const step = Math.abs(Math.sin(ph)); const bob = (step * 0.05 - (1 - step) ** 6 * 0.012) * w + D * Math.abs(Math.sin(t * 9)) * 0.09;
     const breathPh = t * 1.7 * ws, breath = Math.sin(breathPh) * Math.max(0, 1 - w);
     body.position.y = bob + breath * 0.004 * I; body.position.x = I * 0.012 * shift;
     body.rotation.z = Math.sin(ph) * 0.045 * w + I * 0.03 * shift;
@@ -1223,7 +1223,10 @@ const mkFurn = (o) => { col(o.x - o.rx, o.z - o.rz, o.x + o.rx, o.z + o.rz, o.h 
 const stool = (x, z, h = 0.75) => { const idx = STOOLS.length; const f = mkFurn({ kind: 'stool', name: 'el taburete', x, z, h, rx: 0.21, rz: 0.21, stoolIdx: idx }); STOOLS.push(f); return f; };
 // (sin taburetes en la barra: interior sin mobiliario, a petición de Antonio)
 // 4 taburetes sueltos por la sala (se podrán subir/volcar en la fase 2)
-const STOOLS_IN = [[-3.2, -3.6], [-0.4, -4.3], [4.0, -3.4], [6.7, -4.4]]; for (const [x, z] of STOOLS_IN) stool(x, z);
+// taburetes frente a la barra + 2 mesas altas con taburetes en la zona de la barra (todos dinámicos en W.FURN)
+const STOOLS_IN = [[-5.45, -5.85], [-4.25, -5.85], [6.35, -5.22], [6.35, -6.48], [-0.5, -6.55], [0.6, -6.55], [3.1, -6.55], [4.1, -6.55]];
+for (const [x, z] of STOOLS_IN) stool(x, z);
+const HIGHT_IN = [[-4.85, -5.85], [6.35, -5.85]];
 // --- escenario elevado: tarima, reja frontal, pantalla LED, PAR rojos en barra negra, altavoz colgado
 const STG = { x0: 7.81, x1: 11.44, z0: -7.34, z1: 0, h: 0.6 };
 { col(STG.x0, STG.z0, STG.x1, STG.z1, 0.62); GROUND.push([7.12, -4.25, 7.48, -2.85, 0.21], [7.48, -4.25, 7.82, -2.85, 0.42], [7.81, -7.2, 11.3, -0.2, 0.62]);
@@ -1320,7 +1323,7 @@ const hiTable = (x, z, top = M.darkwood) => { const g = new THREE.Group();
   const bs = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.03, 14), M.frame); bs.position.y = 0.015; g.add(bs);
   g.position.set(x, 0, z); g.userData.noCam = true; g.traverse(o => { o.userData.noCam = true; }); scene.add(g);
   return mkFurn({ kind: 'hiTable', name: 'la mesa alta', x, z, h: 1.1, rx: 0.42, rz: 0.42, g }); };
-// (sin mesas altas ni taburetes en el interior)
+for (const [x, z] of HIGHT_IN) hiTable(x, z); // 2 mesas altas en la zona de la barra
 // escalera de caracol amarilla DETRÁS de la barra (extremo izq. de la zona de camareros, contra la pared del fondo) → sube a un cuartillo/altillo
 { const x = -2.45, z = -9.15, FL = 2.62, ST = 12; CYL(0.05, FL + 1.0, M.yellow, x, 0, z, 10);
   for (let i = 0; i < ST; i++) { const a = 1.4 + i * 0.46, y = 0.18 + i * (FL - 0.18) / (ST - 1); const st = new THREE.BoxGeometry(0.62, 0.04, 0.28); st.translate(0.33, 0, 0); addG(st, M.yellow, x, y, z, a); const pole = new THREE.CylinderGeometry(0.012, 0.012, 0.9, 5); pole.translate(0.63, 0.45, 0); addG(pole, M.yellow, x, y, z, a); }
@@ -1715,7 +1718,7 @@ const STOOLM = (() => { const n = STOOLS.length; const mergeNI = gs => { const o
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), ax = new THREE.Vector3(), T1 = new THREE.Matrix4(), T2 = new THREE.Matrix4();
   function set(i) { const s = STOOLS[i]; const [dx, dz] = s.dir, r = 0.15, a = s.ang + s.wob; ax.set(dz, 0, -dx); q.setFromAxisAngle(ax, a); T1.makeTranslation(s.x + dx * r, 0, s.z + dz * r); T2.makeTranslation(-dx * r, 0, -dz * r); m4.makeRotationFromQuaternion(q); m4.premultiply(T1).multiply(T2); seat.setMatrixAt(i, m4); legs.setMatrixAt(i, m4); seat.instanceMatrix.needsUpdate = legs.instanceMatrix.needsUpdate = true; }
   for (let i = 0; i < n; i++) set(i); seat.computeBoundingSphere(); legs.computeBoundingSphere(); seat.frustumCulled = legs.frustumCulled = false; return { set, seat, legs }; })();
-window.HW = { PICNIC_M, vehicle, GROUND, STOOLS_IN, STOOLS, FURN, STOOLM, BUS_V, busHooks, AVE_INF, scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, CAMB, CART, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
+window.HW = { PICNIC_M, vehicle, GROUND, STOOLS_IN, HIGHT_IN, STOOLS, FURN, STOOLM, BUS_V, busHooks, AVE_INF, scene, COLL, P, DJ, STG, SPOTS, INT, CEIL, BLD, LITE, LIGHTS, RAILS, BEAMS, BALL, PARS, WARM, GARL, LED_C, LED_T, ledScreen, LEDM, updTraffic, CARS, ROOF, MARQ, CAMB, CART, bake: () => bakeStatic(m => (m === M.slats || m === M.awning || m === M.leaf) ? ROOF : null), M, H, XL, XR, ZB, CURB, PZ, PORT_H, DOWN };
 })();
 </script>
 <script type="module">document.getElementById('logo').src = window.HANGAR_IMG.logo; // ===== HANGAR · juego (exploración libre) =====
@@ -1758,7 +1761,7 @@ function updStaff(dt) { for (const s of STAFF) { const dx = s.tx - s.x; let sp =
   else { s.yaw += angDiff(s.yaw, 0) * Math.min(1, dt * 5); if (!s.busy) s.wait -= dt; if (s.wait < 0) { const lo = s === STAFF[0] ? -1.0 : 1.8, hi = s === STAFF[0] ? 1.3 : 6.0; s.tx = lo + Math.random() * (hi - lo); s.wait = 2.5 + Math.random() * 5; } }
   s.n.position.set(s.x, STAFF_Y, s.z); s.n.rotation.y = s.yaw; s.n.userData.update(dt, { speed: sp, grounded: true, wave: !!s.wave }); } }
 // la pandilla como PNJ: grupitos repartidos por la sala y la terraza (mirando a su corrillo)
-const NPC_SPOTS = [[0.4, -3.0, 1.5, -3.6], [2.1, -2.8, 1.5, -3.6], [1.3, -4.3, 1.5, -3.6], [5.7, -1.8, 9.4, -3.2], [5.9, -4.9, 9.4, -3.5], [-0.2, -6.25, -0.2, -7.5], [3.5, -6.25, 3.5, -7.5], [-2.5, 4.85, -1.0, 5.2], [6.6, 6.25, 5.4, 6.25]];
+const NPC_SPOTS = [[0.4, -3.0, 1.5, -3.6], [2.1, -2.8, 1.5, -3.6], [1.3, -4.3, 1.5, -3.6], [5.7, -1.8, 9.4, -3.2], [5.5, -3.8, 9.4, -3.5], [-3.2, -5.1, -4.85, -5.85], [2.2, -5.4, 2.2, -7.5], [-2.5, 4.85, -1.0, 5.2], [6.6, 6.25, 5.4, 6.25]];
 const NPCS = [];
 function placeNPCs() { NPCS.length = 0; let k = 0; PJ.forEach((n, i) => { if (i === selIdx) return; const [x, z, fx, fz] = NPC_SPOTS[k++ % NPC_SPOTS.length]; n.position.set(x, 0, z); n.rotation.y = Math.atan2(fx - x, fz - z); n.visible = true; NPCS.push(n); }); }
 const NPC_R = 1.12; // separación dura cabeza-cabeza entre dos personajes Pop (rA + rB ≈ 0,56 + 0,56 = 1,12 m)
@@ -1860,7 +1863,7 @@ function stepPlayer(dt) {
     if (P.pos.y > 2.0 && P.pos.x < -2.18 && P.pos.z > -9.55 && Math.hypot(P.vel.x, P.vel.z) > 0.35) { useStairs(false); return; }
   }
   if (HOOK.after) HOOK.after(dt); { const gy = P.pos.y > 2.0 ? 2.72 : (HOOK.ground ? HOOK.ground(P.pos.x, P.pos.z, groundAt(P.pos.x, P.pos.z)) : groundAt(P.pos.x, P.pos.z)); P.pos.y = gy > P.pos.y ? Math.min(gy, P.pos.y + dt * 5) : Math.max(gy, P.pos.y - dt * 6); }
-  ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: Math.hypot(P.vel.x, P.vel.z) / 2.4, grounded: true, turn: clamp(P.turn || 0, -6, 6) * 0.1 }); }
+  ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.userData.update(dt, { speed: Math.hypot(P.vel.x, P.vel.z) / 2.4, grounded: true, dance: !!(window.NOCHE && NOCHE.PL && NOCHE.PL.dance), turn: clamp(P.turn || 0, -6, 6) * 0.1 }); }
 // ---------- cámara (seguimiento + brazo con colisión; sin ocultar geometría) ----------
 const cam = { yaw: 0, pitch: 0.32, target: V3() }; let camDist = TOUCH && innerHeight > innerWidth ? 6.4 : 5.6, camMode = 'follow', camFix = null;
 cam.yaw = P.yaw + Math.PI; cam.target.copy(P.pos).add(V3(0, 1.2, 0));
@@ -2017,7 +2020,7 @@ const LABEL = new THREE.MeshStandardMaterial({ color: '#f2e6c8', roughness: 0.6 
 function bottle(kind) { const g = new THREE.Group(); if (kind === 'cubata') { const gl = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.042, 0.15, 12, 1, true), GLASS.cubata); gl.position.y = 0.075; const li = new THREE.Mesh(new THREE.CylinderGeometry(0.046, 0.04, 0.11, 12), COLA); li.position.y = 0.06; const st = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.2, 4), new THREE.MeshBasicMaterial({ color: '#ff2bd0' })); st.position.set(0.02, 0.13, 0); st.rotation.z = 0.25; g.add(gl, li, st); }
   else { const tall = kind === 'tercio' ? 1 : 0.8, m = GLASS[kind] || GLASS.tercio; const b = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.15 * tall, 10), m); b.position.y = 0.075 * tall; const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.036, 0.06, 10), m); sh.position.y = 0.15 * tall + 0.03; const nk = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.05, 8), m); nk.position.y = 0.15 * tall + 0.085; const lb = new THREE.Mesh(new THREE.CylinderGeometry(0.0375, 0.0375, 0.06, 10, 1, true), LABEL); lb.position.y = 0.07 * tall; const cp = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.012, 8), CAP); cp.position.y = 0.15 * tall + 0.115; g.add(b, sh, nk, cp); if (kind !== 'agua') g.add(lb); }
   g.userData.noCam = true; g.traverse(o => { o.userData.noCam = true; }); return g; }
-function holdIn(n, kind) { const arm = n.userData.arms[1]; const b = bottle(kind); b.position.set(0, -0.36, 0.06); b.rotation.x = -0.25; b.scale.setScalar(1.25); arm.add(b); return b; }
+function holdIn(n, kind) { const arm = n.userData.arms[1]; const b = bottle(kind); b.position.set(0, -0.34, 0.08); b.rotation.x = -0.25; b.scale.setScalar(1.42); arm.add(b); arm.rotation.x = -0.85; arm.rotation.z = 0.16; return b; }
 // ---------- jugador: bebida en la mano, bailar, taburete, cola ----------
 const PL = { drink: null, kind: null, sips: 0, sipT: 0, round: 0, dance: false, stool: null, q: -1, buzz: 0, req: [], kicked: 0, inWC: 0, wcCool: 0, onStoolT: 0, stoolFama: 0, warnT: 0 };
 function dropDrink() { if (PL.drink && PL.drink.parent) PL.drink.parent.remove(PL.drink); PL.drink = null; PL.kind = null; PL.round = 0; updInv(); }
@@ -2047,9 +2050,9 @@ const XWC = EXPLORE ? [] : [mkW(mkPop(extraCfg(true, 4242), false), -9.3, -4.7, 
 XWC.forEach(w => { w.face = Math.PI / 2; });
 // público del Hangar (20 en escritorio, 14 en móvil LITE; 0 en /explorar/): repartidos por la pista, escenario, barra, soportal y terraza
 const PUBLICO_SPOTS = [
-  [-4.9, -1.7, 0.8], [-3.2, -1.7, 2.2], [-1.5, -2.8, 1.4], [-4.9, -3.2, 1.5],
+  [-4.9, -1.7, 0.8], [-3.2, -1.7, 2.2], [-1.5, -2.8, 1.4], [-3.5, -3.3, 1.5],
   [0.1, -1.5, 2.8], [3.6, -1.4, -2.4], [3.6, -3.2, 1.8], [4.8, -1.6, -1.5],
-  [2.3, -5.3, 0.4], [5.2, -3.3, 1.5], [6.7, -0.9, -1.9], [6.7, -6.1, -0.8],
+  [-0.9, -4.1, 0.4], [4.2, -4.3, 1.5], [6.7, -0.9, -1.9], [6.6, -3.6, -0.8],
   [-5.1, 1.8, 0.6], [-2.5, 1.9, -0.5], [4.8, 1.8, 0.9], [7.8, 1.9, -1.1],
   [-5.8, 5.2, 1.4], [-2.5, 8.2, 3.1], [0.8, 8.1, -2.9], [10.1, 5.2, -1.6]
 ];
@@ -2114,12 +2117,34 @@ function updQueue(dt) { if (EXPLORE || !N.on) return; // los clientes extra vuel
 const MENU = [['tercio', 'Tercio', '3,50 €'], ['botellin', 'Botellín', '2,50 €'], ['cubata', 'Cubata', '7 €'], ['ronda', 'Ronda pa la pandilla', '3 botellines · 7 €'], ['agua', 'Agua', '2 € (sí, 2 €)'], ['cana', '¿Una caña?', '…']];
 const drk = $('drk'); for (const [k, l, pr] of MENU) { const b = document.createElement('button'); b.innerHTML = `${l}<small>${pr}</small>`; b.onclick = e => { e.stopPropagation(); order(k); }; b.addEventListener('pointerdown', e => e.stopPropagation()); drk.appendChild(b); }
 let drkOpen = null; // {colado}
-function openBar(colado) { drkOpen = { colado, x: P.pos.x }; drk.classList.add('on'); }
-function closeBar() { drkOpen = null; drk.classList.remove('on'); }
-function order(k) { if (!drkOpen) return; const col = drkOpen.colado, x = clamp(P.pos.x, -2.6, 6.2); closeBar();
-  if (k === 'cana') { const s = barman(x); say(s.n, pick(['¿Caña? Aquí no hay grifo, chiquillo. Tercio o botellín.', 'Ozú, ¿caña? Esto no es un bar de tapas: botellín o tercio.', 'Grifo no hay. Ni lo ha habido. ¿Tercio?']), { pri: 3, dur: 5 }); return; }
-  serveAt(x, s => { giveDrink(k); say(s.n, col ? pick(['Te pongo porque me pillas buena… la próxima, A LA COLA.', 'Toma, pero que sepas que te has colado, ¿eh?']) : pick(['¡Marchando! Que aproveche.', 'Aquí tienes, rey.', 'Fresquito, recién sacado.', 'Toma, cariño. ¿Algo más?']), { pri: 3, dur: 4.5, cls: col ? 'w' : '' });
-    if (PL.q >= 0) qLeave('P'); if (!col) done('tercio'); if (k === 'ronda') { if (N.tasks.includes('ronda')) evt('🍾 Ronda en la mano: dásela a 3 de la pandilla', 3); } }); }
+const BAR_BOTTLES = [];
+function putBarBottle(x, kind) {
+  const b = bottle(kind === 'ronda' ? 'botellin' : kind);
+  b.scale.setScalar(1.35);
+  b.position.set(clamp(x, -2.8, 6.4), 1.06, -7.32);
+  scene.add(b); BAR_BOTTLES.push(b);
+  while (BAR_BOTTLES.length > 8) { const old = BAR_BOTTLES.shift(); if (old.parent) old.parent.remove(old); }
+  return b;
+}
+function openBar(colado) { drkOpen = { colado, x: P.pos.x }; drk.classList.add('on'); updAction(); }
+function closeBar() { drkOpen = null; drk.classList.remove('on'); updAction(); }
+function order(k) {
+  const col = drkOpen ? drkOpen.colado : false, x = clamp(P.pos.x, -1.2, 6.2);
+  closeBar();
+  const s = barman(x);
+  s.busy = true; s.tx = x; s.x = clamp(s.x + Math.sign(x - s.x) * Math.min(Math.abs(x - s.x), 2.2), -1.2, 6.2); s.yaw = 0; s.n.position.x = s.x; s.n.rotation.y = 0;
+  if (k === 'cana') { s.busy = false; say(s.n, pick(['¿Caña? Aquí no hay grifo, chiquillo. Tercio o botellín.', 'Ozú, ¿caña? Esto no es un bar de tapas: botellín o tercio.', 'Grifo no hay. Ni lo ha habido. ¿Tercio?']), { pri: 4, dur: 5 }); return; }
+  // servir al instante: botella en la encimera + bebida 3D en la mano del jugador con el brazo levantado
+  s.wave = true; setTimeout(() => { s.wave = false; s.busy = false; s.wait = 2.5; }, 1100);
+  putBarBottle(P.pos.x, k);
+  giveDrink(k);
+  const kLabel = { tercio: 'tercio bien frío', botellin: 'botellín', cubata: 'cubata', ronda: 'ronda de botellines', agua: 'agua fresquita' }[k] || 'tercio';
+  say(s.n, col ? pick(['Te pongo porque me pillas buena… la próxima, A LA COLA.', 'Toma, pero que sepas que te has colado, ¿eh?']) : pick(['¡Marchando! Aquí tienes tu ' + kLabel + '.', '¡Aquí tienes, rey! ' + kLabel + ' recién sacado.', '¡Toma, cariño! Fresquito, que aproveche.']), { pri: 4, dur: 4.6, cls: col ? 'w' : 'g' });
+  if (PL.q >= 0) qLeave('P');
+  if (!col) done('tercio');
+  if (k === 'ronda' && N.tasks.includes('ronda')) evt('🍾 Ronda en la mano: dásela a 3 de la pandilla', 3);
+  updAction();
+}
 // ---------- mobiliario dinámico (taburetes, sillas y mesas de terraza/sala): empujar/mover, subirse, tambalear y volcar ----------
 const STO = W.STOOLS, FURN = W.FURN || W.STOOLS; let stoolTick = 0;
 function stoolNear(maxD, st = 'up') { let best = null, bd = maxD; for (const s of FURN) { if (s.st !== st) continue; const d = Math.hypot(s.x - P.pos.x, s.z - P.pos.z) - Math.max(0, Math.max(s.rx, s.rz) - 0.22); if (d < bd) { bd = d; best = s; } } return best; }
@@ -2628,29 +2653,38 @@ function findAction() { const x = P.pos.x, z = P.pos.z, ins = inside(P.pos);
   if (PL.ko) return null;
   const ea = findEggAction(x, z, ins); if (ea) return ea;
   if (PL.stool) return act('baja', 'Bajarse del taburete', () => hopOff(null));
-  if (drkOpen) return null;
+  if (drkOpen) return act('barPick', '🍺 Pedir un tercio bien frío (o elige 1–6 en la carta)', () => order('tercio'));
   if (PL.q >= 0) return PL.q === 0 ? null : act('cola', `En la cola (${PL.q + 1}º)… salir de la cola`, () => qLeave('P'));
   const fs = stoolNear(1.25, 'down'); if (fs) return act('lev', 'Levantar ' + (fs.name || 'el taburete'), () => { fs.st = 'raising'; fs.fallT = 0; done('levantar'); fama(3); N.exp = Math.max(0, N.exp - 6); say(ant, 'Ea, como nuevo.', { pri: 2, cls: 'me' }); });
   if (PL.round > 0) { const n = npcNear(1.7); if (n) return act('dar', 'Dar un botellín a ' + npcName(n), () => giveBot(n)); }
   // Álvaro (desde la cabina o delante de ella)
   if (Math.hypot(x - alv.position.x, z - alv.position.z) < 2.4 && (P.pos.y > 0.4 || x > -4.0)) return act('dj', 'Pedirle una canción a Álvaro', askSong);
   if (VANE && x > -6.6 && x < -5.4 && z > -6.6 && z < -5.25) return act('vane', N.jacket ? 'Dejar la chaqueta' : (N.ticket && !N.ticket.lost ? 'Recoger la chaqueta (ticket ' + N.ticket.n + ')' : 'Pedir la chaqueta… sin ticket'), cloak);
-  // barra: cola o colarse
-  const atBar = ins && z < -6.25 && z > -7.4 && x > -4.1 && x < 6.7;
+  // barra: cola o pedir (funciona en todos los modos, incluso si ya tienes bebida o tras servir te la bebes)
+  const atBar = ins && P.pos.y < 1.0 && z < -5.85 && z > -7.55 && x > -3.9 && x < 6.0;
   if (!EXPLORE && N.on && qBusy() && Q_.line.length) { const [ex, ez] = qPos(Q_.line.length); if (Math.hypot(x - ex, z - ez) < 0.75) return act('cola', 'Ponerse a la cola', () => { qJoin('P'); N.stats.queue++; }); }
-  if (atBar && !PL.drink) { const busy = !EXPLORE && N.on && Q_.line.length > 0; return act('bar', busy ? 'Pedir… colándote (¡hay cola!)' : 'Pedir en la barra', () => { if (busy) skipQueue(); openBar(busy); }, busy); }
+  if (atBar && !PL.drink) { const busy = !EXPLORE && N.on && Q_.line.length > 0; return act('bar', busy ? 'Pedir… colándote (¡hay cola!)' : '🍺 Pedir en la barra', () => { if (busy) skipQueue(); openBar(busy); }, busy); }
+  if (atBar && PL.drink && PL.kind !== 'ronda') return act('beber', '🍺 Beber (o pulsa 1–6 para pedir otra)', sip);
   if (!EXPLORE && N.on && ins) { const n = npcNear(1.6); if (n) return act('hola', ((N.greeted && N.greeted.has(n)) ? 'Charlar con ' : 'Saludar a ') + npcName(n), () => greet(n)); }
-  if (N.on && N.live && x > 5.6 && ins && N.gm >= TL.ce && N.gm < TL.bis && !N.done.has('otra')) return act('otra', '¡OTRA! ¡OTRA!', () => { done('otra'); say(ant, '¡¡OTRAAA!!', { pri: 3, cls: 'me' }); sfx('cheer'); });
   if (N.on && x > 5.6 && ins && N.gm >= TL.ce && N.gm < TL.bis && !N.done.has('otra')) return act('otra', '¡OTRA! ¡OTRA!', () => { done('otra'); say(ant, '¡¡OTRAAA!!', { pri: 3, cls: 'me' }); sfx('cheer'); });
-  const st = stoolNear(1.05); if (st) return act('sube', 'Subirse a ' + (st.name || 'el taburete'), () => climb(st));
+  const st = stoolNear(1.05); if (st) return act('sube', st.kind === 'stool' ? 'Subirse al taburete' : 'Subirse a ' + st.name, () => climb(st));
   if (!ins && x > 3.6 && x < 10.4 && z > 3.4 && z < 9.0) return act('foto', '📸 Foto con el rótulo', () => { P.yaw = Math.PI; flash(); sfx('shutter'); done('foto'); say(ant, pick(['¡Pa’l Insta!', 'Que salga el rótulo, ¿eh?', 'Esta de perfil, que es mi lado bueno.']), { pri: 2, cls: 'me' }); });
   if (PL.drink && PL.kind !== 'ronda') return act('beber', 'Beber', sip);
-  if (ins) return act('baile', PL.dance ? 'Dejar de bailar' : 'Bailar', () => { PL.dance = !PL.dance; });
-  return null; }
+  return act('baile', PL.dance ? '💃 Dejar de bailar' : '💃 Bailar', () => toggleDance()); }
 function skipQueue() { stupidAngry(6); N.stats.skips++; expl(14, '¡Te has colado en la barra!'); fama(-3); const near = XQ.filter(w => Q_.line.includes(w)).map(w => w.n); const ls = ['¡Eh, la cola, malaje!', 'Ozú, qué cara más dura…', '¡Que llevamos aquí desde el concierto!', 'Mira el listo este…', '¿Tú de qué vas, chiquillo?']; near.slice(0, 2).forEach((n, i) => { n.rotation.y = Math.atan2(P.pos.x - n.position.x, P.pos.z - n.position.z); setTimeout(() => say(n, ls[(i + (Math.random() * 3 | 0)) % ls.length], { pri: 4, cls: 'w' }), i * 500); }); for (const w of XQ) if (Q_.line.includes(w)) w.face = Math.atan2(P.pos.x - w.n.position.x, P.pos.z - w.n.position.z); }
 function sip() { if (!PL.drink) return; PL.sipT = 1.0; PL.sips--; fama(1); if (PL.sips <= 0) { setTimeout(() => { if (PL.kind === null) return; N.stats.drinks++; const k = PL.kind; dropDrink(); say(ant, k === 'agua' ? 'Hidratación, que mañana es mañana.' : pick(['¡Seco!', 'Otro muerto.', 'Ozú, cómo entra.']), { pri: 2, cls: 'me' }); if (N.stats.drinks === 4) setTimeout(() => say(ant, 'Ozú… ¿el Hangar siempre ha dado vueltas?', { pri: 3, cls: 'me' }), 1500); updInv(); }, 900); } else updInv(); }
 function doAction() { if (STATE !== 'play') return; startAudio(); const a = ACT; if (a) a.fn(); }
-addEventListener('keydown', e => { if (e.code === 'KeyE' || e.code === 'Enter') { e.preventDefault(); doAction(); } else if (drkOpen && /^Digit[1-6]$/.test(e.code)) order(MENU[+e.code.slice(5) - 1][0]); else if (e.code === 'Escape') closeBar(); });
+function toggleDance(force) {
+  PL.dance = force != null ? !!force : !PL.dance;
+  if (PL.dance) say(ant, pick(['¡A bailar, que son dos días! 💃', '¡Vamoos, qué temazo!', '¡Moviendo el esqueleto en el Hangar!']), { pri: 2, cls: 'me' });
+  updAction();
+}
+addEventListener('keydown', e => {
+  if (e.code === 'KeyE' || e.code === 'Enter') { e.preventDefault(); doAction(); }
+  else if (e.code === 'KeyB' || (e.code === 'Space' && !PL.ride && !drkOpen)) { e.preventDefault(); startAudio(); if (STATE === 'play') toggleDance(); }
+  else if ((drkOpen || (inside(P.pos) && P.pos.z < -5.85)) && /^Digit[1-6]$/.test(e.code)) { startAudio(); order(MENU[+e.code.slice(5) - 1][0]); }
+  else if (e.code === 'Escape') closeBar();
+});
 bAct.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); doAction(); });
 function updAction() { const a = STATE === 'play' ? findAction() : null; ACT = a; const lab = a ? a.lab : ''; if (lab !== updAction.l) { updAction.l = lab; if (a) { promptEl.innerHTML = (TOUCH ? '' : '<kbd>E</kbd>') + lab; promptEl.style.display = 'block'; promptEl.classList.toggle('warn', !!a.warn); bAct.textContent = lab.length > 22 ? lab.split(' ').slice(0, 3).join(' ') + '…' : lab; bAct.classList.add('ready'); } else { promptEl.style.display = 'none'; bAct.textContent = 'ACCIÓN'; bAct.classList.remove('ready'); } } }
 // ---------- ganchos en el jugador ----------
@@ -2663,8 +2697,8 @@ HOOK.move = (dt, I) => { if (ASTRAL.on) return true; if (PL.ko) { stepKO(dt); re
 HOOK.after = dt => { checkAvenue(dt); if (goldVinyl.visible && Math.hypot(P.pos.x - goldVinyl.position.x, P.pos.z - goldVinyl.position.z) < 1.45) { goldVinyl.visible = false; sfx('ding'); fama(20, '💿 ¡Vinilo de Oro secreto del Hangar!'); say(ant, '¡Un vinilo de oro detrás del botellero!', { pri: 4, cls: 'me' }); }
   if (parkCoin.visible && Math.hypot(P.pos.x - parkCoin.position.x, P.pos.z - parkCoin.position.z) < 1.3) { parkCoin.visible = false; sfx('ding'); fama(12, '🪙 Moneda de la suerte del parque'); say(ant, '¡Mira, una moneda brillante en el banco!', { pri: 3, cls: 'me' }); } stoolContact(dt); if (ticketMesh.visible && Math.hypot(P.pos.x - ticketMesh.position.x, P.pos.z - ticketMesh.position.z) < 0.6) { ticketMesh.visible = false; N.ticket.lost = false; done('ticket'); N.done.delete('ticket'); evt('🎟 ¡Ticket recuperado!', 2.4); say(ant, '¡Mi ticket! Ozú, qué susto.', { pri: 3, cls: 'me' }); updInv(); } };
 HOOK.upd = dt => { if (ASTRAL.on) { updAstral(dt); return; } goldVinyl.rotation.y += dt * 2.2; parkCoin.rotation.z += dt * 2.6; STUPID.upd(dt); updCat(dt); if (danceAllT > 0) danceAllT -= dt; updAmb(dt); updGreeter(dt); updMatch(dt); updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC, ...PUBLICO, ...BUS_PAX.filter(p => p.n.visible)]) updW(w, dt); if (VANE) updW(VANE, dt); sepAllChars(2);
-  if (PL.dance && !PL.stool && STATE === 'play') ant.userData.update(dt * 0.001, { speed: 0, grounded: true, dance: true });
   if (PL.sipT > 0) { PL.sipT -= dt; const a = ant.userData.arms[1]; const k = Math.sin(Math.min(1, (1 - PL.sipT) / 1) * Math.PI); a.rotation.x = -2.3 * k; a.rotation.z = -0.35 * k; }
+  else if (PL.drink && !PL.dance) { const a = ant.userData.arms[1]; a.rotation.x = -0.85; a.rotation.z = 0.16; }
   if (drkOpen && (Math.hypot(P.pos.x - drkOpen.x, P.pos.z - (-6.8)) > 1.8 || P.pos.z > -5.0) && PL.q < 0) closeBar();
   if (ticketMesh.visible) { ticketMesh.children[0].material.opacity = 0.25 + 0.2 * Math.sin(T * 5); }
   evtT -= dt; if (evtT <= 0) $('evt').classList.remove('on'); updAction(); if (N.on) updHUD(); };
@@ -2738,7 +2772,7 @@ function sepAllChars(iters = 2) {
 }
 sepAllChars(10);
 
-window.NOCHE = { PUBLICO, BUS_PAX, BUS_BOARD, BUS_ALIGHT, triggerBusStop, FURN, sepAllChars, ASTRAL, startAstral, finishAstral, MOTO, mountMoto, dismountMoto, konami80s, petCat, knockCuartillo, playDrums, flipPicnic, goldVinyl, parkCoin, CAT, STUPID, openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
+window.NOCHE = { toggleDance, BAR_BOTTLES, PUBLICO, BUS_PAX, BUS_BOARD, BUS_ALIGHT, triggerBusStop, FURN, sepAllChars, ASTRAL, startAstral, finishAstral, MOTO, mountMoto, dismountMoto, konami80s, petCat, knockCuartillo, playDrums, flipPicnic, goldVinyl, parkCoin, CAT, STUPID, openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
 
 // menú de entrada
 function choose(i) { selIdx = i; ant = PJ[i]; antCfg = ROSTER[i]; if (!EXPLORE) store.set('hangar_pj', i); placeNPCs(); retag(); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.visible = true; }
