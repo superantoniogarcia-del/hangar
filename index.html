@@ -1795,11 +1795,41 @@ function placeNPCs() { NPCS.length = 0; let k = 0; PJ.forEach((n, i) => { if (i 
 const NPC_R = 1.12; // separación dura cabeza-cabeza entre dos personajes Pop (rA + rB ≈ 0,56 + 0,56 = 1,12 m)
 function pushNPC(p) {
   const list = window.ALL_CHARS ? window.ALL_CHARS() : NPCS;
-  for (let it = 0; it < 3; it++) for (const n of list) {
-    if (!n || !n.visible || n === ant || Math.abs((p.y || 0) - (n.position.y || 0)) > 1.2) continue;
-    const minD = (ant.userData.rad || 0.56) + (n.userData.rad || 0.56);
-    const dx = p.x - n.position.x, dz = p.z - n.position.z, d2 = dx * dx + dz * dz;
-    if (d2 < minD * minD && d2 > 1e-6) { const d = Math.sqrt(d2), k = (minD - d) / d; p.x += dx * k; p.z += dz * k; }
+  const fixed = window.IS_FIXED_CHAR || (n => (n.position.y || 0) > 0.25);
+  for (let it = 0; it < 4; it++) {
+    for (const n of list) {
+      if (!n || !n.visible || n === ant || Math.abs((p.y || 0) - (n.position.y || 0)) > 1.2) continue;
+      const minD = (ant.userData.rad || 0.56) + (n.userData.rad || 0.56);
+      const dx = n.position.x - p.x, dz = n.position.z - p.z, d2 = dx * dx + dz * dz;
+      if (d2 >= minD * minD || d2 < 1e-9) continue;
+      const d = Math.sqrt(d2), pen = minD - d, ux = dx / d, uz = dz / d;
+      if (fixed(n)) {
+        // personaje fijo tras mostrador o en escenario: el jugador rodea
+        p.x -= ux * pen; p.z -= uz * pen;
+        continue;
+      }
+      // personaje móvil: el jugador lo EMPUJA y lo aparta hacia delante y a un lado para poder pasar siempre
+      const vx = P.vel.x, vz = P.vel.z;
+      const cross = vx * uz - vz * ux;
+      const side = Math.abs(cross) > 0.05 ? Math.sign(cross) : ((n.id & 1) ? 1 : -1);
+      const tx = -uz * side, tz = ux * side;
+      n.position.x += ux * (pen * 0.88) + tx * (pen * 0.38);
+      n.position.z += uz * (pen * 0.88) + tz * (pen * 0.38);
+      p.x -= ux * (pen * 0.12);
+      p.z -= uz * (pen * 0.12);
+      collide(n.position, n.userData.rad || 0.56, false);
+      // si el PNJ ha tocado pared/columna/mesa, deslizarlo lateralmente y garantizar distancia >= minD
+      const dx2 = n.position.x - p.x, dz2 = n.position.z - p.z, d2b = dx2 * dx2 + dz2 * dz2;
+      if (d2b < minD * minD && d2b > 1e-9) {
+        const db = Math.sqrt(d2b), rem = minD - db, ux2 = dx2 / db, uz2 = dz2 / db;
+        n.position.x += -uz2 * side * rem * 0.75 + ux2 * rem * 0.65;
+        n.position.z += ux2 * side * rem * 0.75 + uz2 * rem * 0.65;
+        collide(n.position, n.userData.rad || 0.56, false);
+        const dx3 = n.position.x - p.x, dz3 = n.position.z - p.z, d3 = Math.hypot(dx3, dz3) || 1;
+        if (d3 < minD) { p.x = n.position.x - (dx3 / d3) * minD; p.z = n.position.z - (dz3 / d3) * minD; }
+      }
+    }
+    if (window.NOCHE && NOCHE.sepAllChars) NOCHE.sepAllChars(1);
   }
 }
 placeNPCs();
@@ -2037,7 +2067,7 @@ function updLights(dt) { const b = beatPhase(), kick = Math.exp(-b * 5), bar = M
   ledT += dt; if (ledT > (LITE ? 0.12 : 0.05)) { drawLED(T); ledT = 0; } }
 // ---------- bucle ----------
 let STATE = TEST ? 'play' : 'menu', topCam = null;
-function update(dt) { if (HOOK.dt) dt = HOOK.dt(dt); T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) n.userData.update(dt, { speed: 0, grounded: true, dance: !!(HOOK.npcDance && HOOK.npcDance(n)), wave: !!(n.userData.waveT > 0 && (n.userData.waveT -= dt) > 0) }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
+function update(dt) { if (HOOK.dt) dt = HOOK.dt(dt); T += dt; if (STATE === 'play') stepPlayer(dt); updCam(dt); alv.userData.update(dt, { speed: 0, grounded: true }); for (const n of NPCS) if (!n.userData.managed) n.userData.update(dt, { speed: 0, grounded: true, dance: !!(HOOK.npcDance && HOOK.npcDance(n)), wave: !!(n.userData.waveT > 0 && (n.userData.waveT -= dt) > 0) }); updStaff(dt); ALVARO.djPose(alv, AC ? Math.max(0, AC.currentTime - T0 - 0.05) : T, BPM); updLights(dt); if (HOOK.upd) HOOK.upd(dt); W.updTraffic(dt, P.pos); W.MARQ.update(dt, T); updAudio(); }
 let last = performance.now(), frozen = false; function loop() { const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now; if (!frozen) { update(dt); if (!(window.NOCHE && NOCHE.ASTRAL && NOCHE.ASTRAL.on && NOCHE.ASTRAL.t >= 1.1)) renderer.render(scene, topCam || camera); layer.style.display = STATE === 'menu' ? 'none' : ''; updTags(); if (HOOK.ui) HOOK.ui(dt); } requestAnimationFrame(loop); }
 // ---------- la noche (bucle de juego, barra, guardarropa, baños, taburetes) ----------
 // ===== HANGAR · LA NOCHE (fase 2): 22:00→06:00 en 5 min, FAMA / EXPULSIÓN, encargos, barra sin grifo, guardarropa, baños, taburetes =====
@@ -2079,9 +2109,40 @@ function extraCfg(girl, seed) { const r = (a) => a[(seed = (seed * 16807) % 2147
   return { skin: r(XSK), hair: { style: r(['short', 'swept', 'curly', 'bald', 'short', 'wavy']), color: hc, side: r(XHAIR), volume: 1.0 }, beard: { style: r(['none', 'short', 'stubble', 'none']), color: hc, dark: '#1a120c' }, brows: { color: '#231a15', thick: 1.0 }, glasses: { type: r(['none', 'none', 'aviator', 'round']), frame: r(['#111', '#c9a24a']), lens: '#0b0d10', sun: Math.random() < 0.3 }, shirt: { type: r(['shirt', 'polo', 'shirt']), color: r(XTOP), open: Math.random() < 0.5, sleeves: r(['long', 'short']) }, jacket: Math.random() < 0.3 ? { color: r(['#1f2638', '#3a3d45', '#5a3a22']) } : undefined, pants: { color: r(['#2d3a50', '#cbb68e', '#2b2f38', '#e9e4d8']) }, shoes: { color: r(['#3b2a20', '#151515', '#7a4a2a']) } }; }
 const mkW = (n, x, z, yaw = 0) => { n.position.set(x, 0, z); n.rotation.y = yaw; return { n, path: [], sp: 1.25, yaw, y: 0, face: null, dance: false, wave: false, done: null }; };
 function walkTo(w, pts, done, sp) { w.path = pts.map(p => V3(p[0], 0, p[1])); w.done = done || null; if (sp) w.sp = sp; }
-function updW(w, dt) { let s = 0; if (w.path.length) { const t = w.path[0], p = w.n.position, dx = t.x - p.x, dz = t.z - p.z, d = Math.hypot(dx, dz); if (d < 0.22) { w.path.shift(); if (!w.path.length && w.done) { const f = w.done; w.done = null; f(w); } } else { const st = Math.min(d, w.sp * dt); p.x += dx / d * st; p.z += dz / d * st; w.yaw += angDiff(w.yaw, Math.atan2(dx, dz)) * Math.min(1, dt * 9); s = w.sp / 2.4; } }
-  else if (w.face != null) w.yaw += angDiff(w.yaw, w.face) * Math.min(1, dt * 5);
-  const gy = w.fixedY != null ? w.fixedY : groundAt(w.n.position.x, w.n.position.z, w.y); w.y += (gy - w.y) * Math.min(1, dt * 10); w.n.position.y = w.y; w.n.rotation.y = w.yaw; w.n.userData.update(dt, { speed: s, grounded: true, dance: w.dance && !s, wave: w.wave }); }
+function updW(w, dt) {
+  let s = 0;
+  if (w.path.length) {
+    w.wpT = (w.wpT || 0) + dt;
+    const t = w.path[0], p = w.n.position, dx = t.x - p.x, dz = t.z - p.z, d = Math.hypot(dx, dz);
+    if (d < 0.32 || w.wpT > 6.5) {
+      w.wpT = 0; w.path.shift();
+      if (!w.path.length && w.done) { const f = w.done; w.done = null; f(w); }
+    } else {
+      const st = Math.min(d, w.sp * dt);
+      p.x += dx / d * st; p.z += dz / d * st;
+      w.yaw += angDiff(w.yaw, Math.atan2(dx, dz)) * Math.min(1, dt * 9);
+      s = w.sp / 2.4;
+    }
+  } else {
+    w.wpT = 0;
+    if (w.face != null) w.yaw += angDiff(w.yaw, w.face) * Math.min(1, dt * 5);
+  }
+  const gy = w.fixedY != null ? w.fixedY : groundAt(w.n.position.x, w.n.position.z, w.y);
+  w.y += (gy - w.y) * Math.min(1, dt * 10);
+  w.n.position.y = w.y; w.n.rotation.y = w.yaw;
+  const wv = !!(w.wave || (w.n.userData.waveT > 0 && (w.n.userData.waveT -= dt) > 0));
+  const dnc = !s && (w.dance || !!(HOOK.npcDance && HOOK.npcDance(w.n)));
+  w.n.userData.update(dt, { speed: s, grounded: true, dance: dnc, wave: wv });
+  // si va dando una putivuelta, va mirando a un lado y a otro fichando el panorama
+  if (w.puti && s > 0.1 && w.n.userData.headPivot) {
+    w.n.userData.headPivot.rotation.y += Math.sin(T * 2.6 + w.n.id) * 0.42;
+  }
+  // si tiene bebida en la mano, la lleva levantada y de vez en cuando pega un trago
+  if (w.bottle || w.n.userData.bot) {
+    const arm = w.n.userData.arms[1], sip = Math.max(0, Math.sin(T * 0.8 + w.n.id * 1.7)) ** 12;
+    arm.rotation.x = -0.82 - 1.15 * sip; arm.rotation.z = 0.15 - 0.25 * sip;
+  }
+}
 // ---------- botellas (sin cañas: tercios, botellines, cubatas) ----------
 const GLASS = { tercio: new THREE.MeshStandardMaterial({ color: '#5a2e0e', roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.92 }), botellin: new THREE.MeshStandardMaterial({ color: '#2f5a1e', roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.92 }), cubata: new THREE.MeshStandardMaterial({ color: '#d8e6f0', roughness: 0.05, transparent: true, opacity: 0.45 }), agua: new THREE.MeshStandardMaterial({ color: '#cfe8ff', roughness: 0.05, transparent: true, opacity: 0.55 }) };
 const LABEL = new THREE.MeshStandardMaterial({ color: '#f2e6c8', roughness: 0.6 }), COLA = new THREE.MeshStandardMaterial({ color: '#3a1a0a', roughness: 0.3 }), CAP = new THREE.MeshStandardMaterial({ color: '#c9a24a', metalness: 0.8, roughness: 0.3 });
@@ -2118,19 +2179,112 @@ const XWC = EXPLORE ? [] : [mkW(mkPop(extraCfg(true, 4242), false), -9.3, -4.7, 
 XWC.forEach(w => { w.face = Math.PI / 2; });
 // público del Hangar (20 en escritorio, 14 en móvil LITE; 0 en /explorar/): repartidos por la pista, escenario, barra, soportal y terraza
 const PUBLICO_SPOTS = [
-  [-4.9, -1.7, 0.8], [-3.2, -1.7, 2.2], [-1.5, -2.8, 1.4], [-3.5, -3.3, 1.5],
-  [0.1, -1.5, 2.8], [3.6, -1.4, -2.4], [3.6, -3.2, 1.8], [4.8, -1.6, -1.5],
-  [-0.9, -4.1, 0.4], [4.2, -4.3, 1.5], [6.7, -0.9, -1.9], [6.6, -3.6, -0.8],
-  [-5.1, 1.8, 0.6], [-2.5, 1.9, -0.5], [4.8, 1.8, 0.9], [7.8, 1.9, -1.1],
+  [-5.2, -0.9, 0.8], [-3.4, -1.9, 2.2], [-1.7, -2.9, 1.4], [-3.6, -3.6, 1.5],
+  [-1.9, -4.3, 0.8], [3.4, -2.7, 1.8], [4.7, -2.3, -1.8], [5.4, -1.0, -1.5],
+  [-0.7, -4.2, 0.4], [4.1, -4.3, 1.5], [6.8, -0.9, -1.9], [6.7, -3.6, -0.8],
+  [-5.1, 1.8, 0.6], [-2.5, 1.9, -0.5], [5.2, 1.8, 0.9], [7.8, 1.9, -1.1],
   [-5.8, 5.2, 1.4], [-2.5, 8.2, 3.1], [0.8, 8.1, -2.9], [10.1, 5.2, -1.6]
 ];
 const N_PUB = EXPLORE ? 0 : (LITE ? 14 : 20);
 const PUBLICO = PUBLICO_SPOTS.slice(0, N_PUB).map(([x, z, yaw], i) => {
   const w = mkW(mkPop(extraCfg(i % 2 === 0, 1501 + i * 131), false), x, z, yaw);
-  w.home = [x, z, yaw]; w.face = yaw; w.dance = i % 3 === 0;
+  w.home = [x, z, yaw]; w.face = yaw; w.dance = i % 3 === 0; w.sp = 1.18 + (i % 4) * 0.06;
   if (i % 2 === 0) w.bottle = holdIn(w.n, ['tercio', 'botellin', 'cubata'][i % 3]);
   return w;
 });
+// Envolver también a los 9 amigos de la pandilla (NPCS) como caminantes para que alternen corrillos, paseos y putivueltas
+const GANG_W = [];
+function syncGangWalkers() {
+  GANG_W.length = 0;
+  for (const n of PJ) n.userData.managed = false;
+  NPCS.forEach((n, i) => {
+    n.userData.managed = true;
+    const w = mkW(n, n.position.x, n.position.z, n.rotation.y);
+    w.home = [n.position.x, n.position.z, n.rotation.y];
+    w.face = n.rotation.y; w.sp = 1.18; w.isGang = true;
+    GANG_W.push(w);
+  });
+}
+syncGangWalkers();
+// Rutas de «PUTIVUELTA» (circuitos continuos por la sala, la barra, la cabina y la terraza fichando quién hay)
+const PUTI_ROUTES = [
+  [[-3.3, -2.0], [-3.3, -4.9], [-0.4, -5.2], [3.0, -5.2], [5.3, -4.1], [5.1, -2.0], [3.5, -0.8], [-1.5, -0.8]],
+  [[1.75, 4.6], [-2.1, 4.8], [-1.5, 1.2], [-1.5, -2.4], [2.4, -3.5], [4.0, -0.8], [4.0, 2.2], [6.0, 5.2]]
+];
+const PUTI_LINES = [
+  'Voy a dar una putivuelta a ver quién hay hoy por aquí… 👀',
+  'Disimula, que llevamos ya tres putivueltas seguidas por la barra.',
+  'He ido al baño cuatro veces y ni he entrado, chiquillo: pura putivuelta.',
+  'Fichando el panorama… mucho polo planchado y mucho cuarentón.',
+  'Haz como que buscas a alguien, que es la quinta vuelta que damos.'
+];
+const STROLL_PTS = [
+  [-3.4, -2.2, 0.9], [-1.6, -2.8, 1.5], [0.8, -3.2, -0.5], [3.3, -2.9, 2.1],
+  [5.2, -2.4, 1.5], [4.4, -4.4, -0.4], [-0.8, -5.1, 3.1], [2.4, -5.2, 3.0],
+  [-2.2, 2.1, 0.4], [4.8, 2.0, -0.6], [-2.4, 5.0, 1.2], [2.2, 4.9, -1.2], [6.4, 6.1, -2.2]
+];
+function routeBetween(x0, z0, x1, z1) {
+  // si cruza del interior (z < -0.5) al exterior (z > 0.5) o viceversa, pasar por los huecos junto al biombo
+  if ((z0 < -0.5 && z1 > 0.5) || (z0 > 0.5 && z1 < -0.5)) {
+    const px = (x0 + x1) < 1.5 ? -1.55 : 4.05;
+    return [[px, z0 < 0 ? -0.9 : 1.1], [px, z0 < 0 ? 1.1 : -0.9], [x1, z1]];
+  }
+  return [[x1, z1]];
+}
+function startPutivuelta(w, routeIdx, startK = 0) {
+  const R = PUTI_ROUTES[routeIdx % PUTI_ROUTES.length];
+  w.puti = true; w.sp = 1.28;
+  const pts = [];
+  for (let k = 0; k <= R.length; k++) pts.push(R[(startK + k) % R.length]);
+  walkTo(w, pts, q => { q.puti = false; q.face = rnd(-3, 3); }, 1.28);
+}
+// Arrancar desde el principio con 4 personas dando una putivuelta y 2 andando entre zonas
+function initBarLife() {
+  if (EXPLORE) return;
+  syncGangWalkers();
+  PUBLICO.slice(0, 4).forEach((w, k) => startPutivuelta(w, k % 2, k * 2));
+  if (GANG_W[2]) startPutivuelta(GANG_W[2], 0, 3);
+  if (GANG_W[5]) startPutivuelta(GANG_W[5], 1, 1);
+}
+initBarLife();
+let strollT = 1.8, putiSayT = 9.0;
+function updBarLife(dt) {
+  if (EXPLORE) return;
+  // si ha cambiado el personaje elegido, resincronizar GANG_W
+  if (GANG_W.length !== NPCS.length || (NPCS[0] && GANG_W[0]?.n !== NPCS[0])) syncGangWalkers();
+  for (const w of GANG_W) {
+    if (TIN.w && TIN.w.n === w.n) continue; // el match de Tinder lleva su propio camino
+    updW(w, dt);
+  }
+  // mantener siempre al menos 4 personas dando una putivuelta por el local
+  const allW = [...PUBLICO, ...GANG_W.filter(w => !(TIN.w && TIN.w.n === w.n))];
+  const putiNow = allW.filter(w => w.puti && w.path.length).length;
+  if (putiNow < 4) {
+    const idle = allW.filter(w => !w.path.length);
+    if (idle.length) startPutivuelta(pick(idle), Math.random() < 0.65 ? 0 : 1, (Math.random() * 8) | 0);
+  }
+  // cada 2,2–3,8 s, 1–2 personas cambian de corrillo o van a la barra / terraza / pista
+  strollT -= dt;
+  if (strollT <= 0) {
+    strollT = rnd(2.2, 3.8);
+    const idle = allW.filter(w => !w.path.length);
+    if (idle.length) {
+      const w = pick(idle), [tx, tz, fy] = pick(STROLL_PTS);
+      w.puti = false;
+      walkTo(w, routeBetween(w.n.position.x, w.n.position.z, tx + rnd(-0.35, 0.35), tz + rnd(-0.35, 0.35)), q => {
+        q.face = fy + rnd(-0.4, 0.4);
+        q.n.userData.waveT = 1.4; // saluda al llegar al nuevo corrillo
+      }, rnd(1.12, 1.32));
+    }
+  }
+  // comentario ocasional de quien va dando la putivuelta
+  putiSayT -= dt;
+  if (putiSayT <= 0 && N.on && !N.ended && BUBS.length < BUB_CAP) {
+    putiSayT = rnd(11, 18);
+    const pw = allW.filter(w => w.puti && w.path.length && w.n.position.distanceTo(camera.position) < 15);
+    if (pw.length) say(pick(pw).n, pick(PUTI_LINES), { pri: 1, dur: 4.8 });
+  }
+}
 // pasajeros de la parada del bus AUCORSA (2 esperan en la acera para SUBIR por la puerta delantera; 2 BAJAN por la puerta trasera)
 const BUS_WAIT_HOME = [[1.4, 8.15], [3.1, 8.15]];
 const BUS_BOARD = EXPLORE ? [] : [0, 1].map(i => { const w = mkW(mkPop(extraCfg(i === 0, 6101 + i * 83), false), BUS_WAIT_HOME[i][0], BUS_WAIT_HOME[i][1], 0); w.face = 0; return w; });
@@ -2815,7 +2969,7 @@ HOOK.move = (dt, I) => { if (ASTRAL.on) return true; if (PL.ko) { stepKO(dt); re
   if (mv && PL.dance) PL.dance = false; return false; };
 HOOK.after = dt => { checkAvenue(dt); if (goldVinyl.visible && Math.hypot(P.pos.x - goldVinyl.position.x, P.pos.z - goldVinyl.position.z) < 1.45) { goldVinyl.visible = false; sfx('ding'); fama(20, '💿 ¡Vinilo de Oro secreto del Hangar!'); say(ant, '¡Un vinilo de oro detrás del botellero!', { pri: 4, cls: 'me' }); }
   if (parkCoin.visible && Math.hypot(P.pos.x - parkCoin.position.x, P.pos.z - parkCoin.position.z) < 1.3) { parkCoin.visible = false; sfx('ding'); fama(12, '🪙 Moneda de la suerte del parque'); say(ant, '¡Mira, una moneda brillante en el banco!', { pri: 3, cls: 'me' }); } stoolContact(dt); if (ticketMesh.visible && Math.hypot(P.pos.x - ticketMesh.position.x, P.pos.z - ticketMesh.position.z) < 0.6) { ticketMesh.visible = false; N.ticket.lost = false; done('ticket'); N.done.delete('ticket'); evt('🎟 ¡Ticket recuperado!', 2.4); say(ant, '¡Mi ticket! Ozú, qué susto.', { pri: 3, cls: 'me' }); updInv(); } };
-HOOK.upd = dt => { if (ASTRAL.on) { updAstral(dt); return; } goldVinyl.rotation.y += dt * 2.2; parkCoin.rotation.z += dt * 2.6; STUPID.upd(dt); updCat(dt); if (danceAllT > 0) danceAllT -= dt; updAmb(dt); updGreeter(dt); updMatch(dt); updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC, ...PUBLICO, ...BUS_PAX.filter(p => p.n.visible)]) updW(w, dt); if (VANE) updW(VANE, dt); sepAllChars(2);
+HOOK.upd = dt => { if (ASTRAL.on) { updAstral(dt); return; } goldVinyl.rotation.y += dt * 2.2; parkCoin.rotation.z += dt * 2.6; STUPID.upd(dt); updCat(dt); if (danceAllT > 0) danceAllT -= dt; updAmb(dt); updGreeter(dt); updMatch(dt); updStools(dt); updNight(dt); updQueue(dt); updWC(dt); for (const w of [...BAND, ...XQ, ...XWC, ...PUBLICO, ...BUS_PAX.filter(p => p.n.visible)]) updW(w, dt); updBarLife(dt); if (VANE) updW(VANE, dt); sepAllChars(2);
   if (PL.sipT > 0) { PL.sipT -= dt; const a = ant.userData.arms[1]; const k = Math.sin(Math.min(1, (1 - PL.sipT) / 1) * Math.PI); a.rotation.x = -2.3 * k; a.rotation.z = -0.35 * k; }
   else if (PL.drink && !PL.dance) { const a = ant.userData.arms[1]; a.rotation.x = -0.85; a.rotation.z = 0.16; }
   if (drkOpen && (Math.hypot(P.pos.x - drkOpen.x, P.pos.z - (-6.8)) > 1.8 || P.pos.z > -5.0) && PL.q < 0) closeBar();
@@ -2830,7 +2984,8 @@ function resetNight() { if (PL.ride) dismountMoto(true); PL.ko = null; STARS.vis
   ticketMesh.visible = false; FURN.forEach(s => { s.x = s.hx; s.z = s.hz; s.vx = 0; s.vz = 0; s.st = 'up'; s.tipped = false; s.ang = 0; s.wob = 0; s.wobA = 0; s.push = 0; s.sync(); });
   for (const n of NPCS) { if (n.userData.bot) { n.userData.bot.parent.remove(n.userData.bot); n.userData.bot = null; } }
   Q_.line.length = 0; Q_.srv = null; Q_.serveT = 3; XQ.forEach((w, i) => { w.away = 0; if (w.bottle) { w.bottle.parent.remove(w.bottle); w.bottle = null; } w.path = []; w.n.position.set(-1.4 + i * 1.45, 0, -4.4); w.face = 0; });
-  PUBLICO.forEach(w => { w.path = []; w.n.position.set(w.home[0], 0, w.home[1]); w.yaw = w.face = w.home[2]; });
+  PUBLICO.forEach(w => { w.path = []; w.puti = false; w.n.position.set(w.home[0], 0, w.home[1]); w.yaw = w.face = w.home[2]; });
+  initBarLife();
   sepAllChars(10);
   BAND.forEach((w, i) => { w.n.visible = false; w.path = []; w.dance = false; }); }
 HOOK.start = () => { if (EXPLORE) { document.body.classList.remove('juego'); return; } resetNight(); N.on = true; document.body.classList.add('juego'); N.onTime = Math.random() < 0.08 || Q.get('puntual') === '1'; if (N.onTime) { TL.cs = 62; TL.ce = 160; TL.bis = 172; TL.bisE = 192; BAND.forEach((w, i) => { const [x, z, f] = BAND_SPOT[i]; w.n.visible = true; w.n.position.set(x, 0.6, z); w.y = 0.6; w.face = f; }); } else Object.assign(TL, { cs: 150, ce: 250, bis: 262, bisE: 282 });
@@ -2856,9 +3011,31 @@ function isFixedChar(n) {
   if ((n.position.y || 0) > 0.25) return true; // en escenario, cabina, tarima o altillo
   return false;
 }
+window.IS_FIXED_CHAR = isFixedChar;
 function sepAllChars(iters = 2) {
   const list = window.ALL_CHARS().filter(n => n && n.visible && n !== ant);
+  const rp = ant ? (ant.userData.rad || 0.56) : 0.56;
   for (let it = 0; it < iters; it++) {
+    // 0) el jugador empuja a los PNJ móviles que tenga delante o al lado (y ellos empujan en cadena a los demás)
+    if (ant && ant.visible && STATE === 'play') {
+      for (const n of list) {
+        if (isFixedChar(n)) continue;
+        if (Math.abs((P.pos.y || 0) - (n.position.y || 0)) > 0.85) continue;
+        const minD = rp + (n.userData.rad || 0.56);
+        let dx = n.position.x - P.pos.x, dz = n.position.z - P.pos.z, d2 = dx * dx + dz * dz;
+        if (d2 < minD * minD && d2 > 1e-6) {
+          const d = Math.sqrt(d2), pen = minD - d, ux = dx / d, uz = dz / d;
+          const side = (n.id & 1) ? 1 : -1;
+          n.position.x += ux * pen + (-uz * side) * (pen * 0.25);
+          n.position.z += uz * pen + (ux * side) * (pen * 0.25);
+          if (pen > 0.035 && (!n.userData.pushSayT || T - n.userData.pushSayT > 5.5)) {
+            n.userData.pushSayT = T;
+            n.rotation.y = Math.atan2(P.pos.x - n.position.x, P.pos.z - n.position.z);
+            if (Math.random() < 0.35) say(n, pick(['¡Uy, pasa, pasa, chiquillo!', '¡Perdona, ya me aparto!', '¡Ozú, qué bulla hay hoy!', '¡Pasa, rey, que estoy en medio!']), { pri: 2, dur: 4.5 });
+          }
+        }
+      }
+    }
     // 1) empujar cada PNJ móvil fuera de muros, columnas, barra y muebles
     for (const n of list) {
       if (isFixedChar(n)) continue;
@@ -2891,7 +3068,7 @@ function sepAllChars(iters = 2) {
 }
 sepAllChars(10);
 
-window.NOCHE = { jumpMoto, toggleDance, BAR_BOTTLES, PUBLICO, BUS_PAX, BUS_BOARD, BUS_ALIGHT, triggerBusStop, FURN, sepAllChars, ASTRAL, startAstral, finishAstral, MOTO, mountMoto, dismountMoto, konami80s, petCat, knockCuartillo, playDrums, flipPicnic, goldVinyl, parkCoin, CAT, STUPID, openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
+window.NOCHE = { GANG_W, startPutivuelta, jumpMoto, toggleDance, BAR_BOTTLES, PUBLICO, BUS_PAX, BUS_BOARD, BUS_ALIGHT, triggerBusStop, FURN, sepAllChars, ASTRAL, startAstral, finishAstral, MOTO, mountMoto, dismountMoto, konami80s, petCat, knockCuartillo, playDrums, flipPicnic, goldVinyl, parkCoin, CAT, STUPID, openReq, submitSong, openPhone, swipe, triggerGreeter, pickTheme, TIN, COOL, slomo, SPOT, N, clearBubs, PL, Q_, TL, STO, BAND, XQ, XWC, VANE, say, BUBS, findAction: () => findAction(), act: () => doAction(), order, done, expel, knock, climb, cloak, loseTicket, start: () => HOOK.start(), fama, expl, bottle, ticketMesh };
 
 // menú de entrada
 function choose(i) { selIdx = i; ant = PJ[i]; antCfg = ROSTER[i]; if (!EXPLORE) store.set('hangar_pj', i); placeNPCs(); retag(); ant.position.copy(P.pos); ant.rotation.y = P.yaw; ant.visible = true; }
